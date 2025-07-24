@@ -101,47 +101,17 @@ impl fmt::Display for Duration {
 }
 
 pub enum Embellishment {
-    GraceNoteHighG,
-    GraceNoteE,
-    GraceNoteD,
-    GraceNoteHighA,
-    GraceNoteF,
-    GraceNoteC,
-    GraceNoteB,
-    GraceNoteLowA,
-    GraceNoteLowG,
-    DoublingLowG,
-    DoublingLowA,
-    DoublingB,
-    DoublingC,
-    DoublingD,
-    DoublingE,
-    DoublingF,
-    DoublingHighG,
-    DoublingHighA,
+    GraceNote(Pitch),
+    Doubling(Pitch),
+    Taorluath,
 }
 
 impl fmt::Display for Embellishment {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let embellishment = match self {
-            Embellishment::GraceNoteD => "D Grace Note",
-            Embellishment::GraceNoteE => "E Grace Note",
-            Embellishment::GraceNoteHighG => "G Grace Note",
-            Embellishment::GraceNoteB => "B Grace Note",
-            Embellishment::GraceNoteC => "C Grace Note",
-            Embellishment::GraceNoteLowA => "Low A Grace Note",
-            Embellishment::GraceNoteLowG => "Low G Grace Note",
-            Embellishment::GraceNoteF => "B Grace Note",
-            Embellishment::GraceNoteHighA => "High A Grace Note",
-            Embellishment::DoublingLowG => "Low G Doubling",
-            Embellishment::DoublingLowA => "Low A Doubling",
-            Embellishment::DoublingB => "B Doubling",
-            Embellishment::DoublingC => "C Doubling",
-            Embellishment::DoublingD => "D Doubling",
-            Embellishment::DoublingE => "E Doubling",
-            Embellishment::DoublingF => "F Doubling",
-            Embellishment::DoublingHighG => "High G Doubling",
-            Embellishment::DoublingHighA => "High A Doubling",
+            Embellishment::GraceNote(pitch) => &format!("{pitch} Grace Note"),
+            Embellishment::Doubling(pitch) => &format!("{pitch} Doubling"),
+            Embellishment::Taorluath => "Taorluath",
         };
         write!(f, "{embellishment}")
     }

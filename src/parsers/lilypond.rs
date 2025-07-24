@@ -64,9 +64,9 @@ fn process_bar(line: &str) -> Measure {
 
 fn process_lily_embellishment(embellishment: &str) -> Embellishment {
     match embellishment {
-        r"\grg" => Embellishment::GraceNoteHighG,
-        r"\grd" => Embellishment::GraceNoteD,
-        r"\gre" => Embellishment::GraceNoteE,
+        r"\grg" => Embellishment::GraceNote(Pitch::HighG),
+        r"\grd" => Embellishment::GraceNote(Pitch::D),
+        r"\gre" => Embellishment::GraceNote(Pitch::E),
         _ => panic!("Invalid embellishment {embellishment}"),
     }
 }
