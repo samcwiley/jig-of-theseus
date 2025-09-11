@@ -1,5 +1,5 @@
-#![allow(unused_imports)]
-use crate::parsers::{ir::*, lilypond::*};
+#![warn(clippy::pedantic)]
+use crate::parsers::lilypond::process_lily;
 
 fn main() -> Result<(), std::io::Error> {
     process_lily()?;

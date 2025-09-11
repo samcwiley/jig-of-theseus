@@ -64,6 +64,7 @@ pub enum Duration {
 }
 
 impl Duration {
+    #[must_use]
     pub fn eighths(&self) -> f32 {
         match self {
             Duration::ThirtySecond => 0.25,
@@ -103,7 +104,31 @@ impl fmt::Display for Duration {
 pub enum Embellishment {
     GraceNote(Pitch),
     Doubling(Pitch),
+    HalfDoubling(Pitch),
+    ThumbDoubling(Pitch),
+    Slur(Pitch),
+    HornpipeShake(Pitch),
+    Grip,
+    BGrip,
     Taorluath,
+    BTaorluath,
+    ThrowD,
+    Crunluath,
+    BCrunluath,
+    LGCrunluath,
+    HeavyCrunluath,
+    HeavyBCrunluath,
+    Edre,
+    Dare,
+    Chedari,
+    Embari,
+    Endari,
+    Birl,
+    Abirl,
+    Gbirl,
+    Darodo,
+    Hodro,
+    Hiotro,
 }
 
 impl fmt::Display for Embellishment {
@@ -112,6 +137,29 @@ impl fmt::Display for Embellishment {
             Embellishment::GraceNote(pitch) => &format!("{pitch} Grace Note"),
             Embellishment::Doubling(pitch) => &format!("{pitch} Doubling"),
             Embellishment::Taorluath => "Taorluath",
+            Embellishment::ThrowD => "D Throw",
+            Embellishment::Crunluath => "Crunluath",
+            Embellishment::HalfDoubling(pitch) => &format!("{pitch} Half Doubling"),
+            Embellishment::Grip => "Grip",
+            Embellishment::BGrip => "Grip with B grace note",
+            Embellishment::Edre => "Edre",
+            Embellishment::Dare => "Dare",
+            Embellishment::Chedari => "Chedari",
+            Embellishment::Embari => "Embari",
+            Embellishment::Endari => "Endari",
+            Embellishment::Birl | Embellishment::Abirl => "Birl",
+            Embellishment::Gbirl => "G grace note birl",
+            Embellishment::Darodo => "Darodo",
+            Embellishment::Slur(pitch) => &format!("{pitch} Slur"),
+            Embellishment::ThumbDoubling(pitch) => &format!("{pitch} Thumb Doubling"),
+            Embellishment::HornpipeShake(pitch) => &format!("{pitch} Hornpipe Shake"),
+            Embellishment::BTaorluath => "Taorluath with B Grace Note",
+            Embellishment::BCrunluath => "Crunluath with B Grace Note",
+            Embellishment::LGCrunluath => "Low G Crunluath",
+            Embellishment::HeavyBCrunluath => "Heavy Crunluath with B Grace Note",
+            Embellishment::Hodro => "Hodro",
+            Embellishment::Hiotro => "Hiotro",
+            Embellishment::HeavyCrunluath => "Heavy Crunluath",
         };
         write!(f, "{embellishment}")
     }
@@ -122,6 +170,7 @@ pub struct Measure {
 }
 
 impl Measure {
+    #[must_use]
     pub fn validate(&self) -> bool {
         self.notes.iter().map(|n| n.duration.eighths()).sum::<f32>() as usize == 6
     }

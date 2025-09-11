@@ -1,4 +1,4 @@
-use crate::ir::{Duration, Embellishment, Measure, Note, Pitch, Tune};
+use crate::ir::{Duration, Embellishment, Measure, Note, Pitch};
 use regex::Regex;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
@@ -11,13 +11,22 @@ pub enum Group {
 
 // pub fn make_lily_note(embellishment: Option<Embellishment>)
 
+/// .
+///
+/// # Panics
+///
+/// Panics if .
+///
+/// # Errors
+///
+/// This function will return an error if .
 pub fn process_lily() -> Result<(), std::io::Error> {
     let f = File::open("music/atholl_highlanders.ly")?;
     let reader = BufReader::new(f);
 
     let mut lines = reader.lines();
 
-    while let Some(meta) = lines.next() {
+    for meta in lines.by_ref() {
         if meta? == "atholl_highlanders = {" {
             break;
         }
@@ -41,12 +50,12 @@ fn process_bar(line: &str) -> Measure {
     let mut tokenized_bar = Vec::new();
     let extract_regex =
         Regex::new(r"(?<embellishment>\\[a-zA-Z]+)|(?<note>[GabcdefgA]\d\.?)").unwrap();
-    let captures = extract_regex.captures_iter(&line);
+    let captures = extract_regex.captures_iter(line);
     for capture in captures {
         if let Some(m) = capture.name("embellishment") {
             tokenized_bar.push((Group::Embellishment, m.as_str().to_string()));
         } else if let Some(m) = capture.name("note") {
-            tokenized_bar.push((Group::Note, m.as_str().to_string()))
+            tokenized_bar.push((Group::Note, m.as_str().to_string()));
         }
     }
     let mut current_embellishment = None;
