@@ -1,3 +1,4 @@
+#![allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 use std::fmt;
 
 pub struct Note {
@@ -112,6 +113,7 @@ pub enum Embellishment {
     BGrip,
     Taorluath,
     BTaorluath,
+    LGTaorluath,
     ThrowD,
     Crunluath,
     BCrunluath,
@@ -137,6 +139,7 @@ impl fmt::Display for Embellishment {
             Embellishment::GraceNote(pitch) => &format!("{pitch} Grace Note"),
             Embellishment::Doubling(pitch) => &format!("{pitch} Doubling"),
             Embellishment::Taorluath => "Taorluath",
+            Embellishment::LGTaorluath => "Low G Taorluath",
             Embellishment::ThrowD => "D Throw",
             Embellishment::Crunluath => "Crunluath",
             Embellishment::HalfDoubling(pitch) => &format!("{pitch} Half Doubling"),
@@ -186,7 +189,7 @@ impl fmt::Display for Measure {
 }
 
 pub struct Part {
-    bars: Vec<Measure>,
+    pub bars: Vec<Measure>,
 }
 impl fmt::Display for Part {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -198,8 +201,8 @@ impl fmt::Display for Part {
 }
 
 pub struct Tune {
-    name: String,
-    parts: Vec<Part>,
+    pub name: String,
+    pub parts: Vec<Part>,
 }
 
 impl fmt::Display for Tune {

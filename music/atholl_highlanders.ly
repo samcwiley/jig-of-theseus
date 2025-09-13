@@ -4,17 +4,10 @@
 
 \include "./includes/scw_bagpipe.ly"
 \include "./includes/score_settings.ly"
-\include "./includes/gitDefinitions.ily"
 
 filename = "atholl_highlanders.ly"
-tunesetVersion = "Version 1"
 source = "trad, simplified"
 
-#(define-bar-line "|.-b" "|." ".|" "|.") %This is for putting all parts in one score!
-#(define-bar-line ":|.-b" ":|." ".|:" ":|.") %This is for putting all parts in one score!
-
-
-#(allow-volta-hook "||")
 #(allow-volta-hook "|")
 
 
@@ -24,7 +17,6 @@ voltaTwo = \markup  { \hspace #20 \italic \fontsize #+5 { "2" }  }
 
 atholl_highlanders = {
   \time 6/8
-  \bar ".|:"
   \repeat volta 2 {
     \grg e4. \grg e8 [c8 \grd a8] |
     \grg e8 [c8 \grd a8] \grg b8 [c8 d8] |

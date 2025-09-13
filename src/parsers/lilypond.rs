@@ -1,4 +1,4 @@
-use crate::ir::{Duration, Embellishment, Measure, Note, Pitch};
+use crate::ir::{Duration, Embellishment, Measure, Note, Part, Pitch, Tune};
 use regex::Regex;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
@@ -20,7 +20,7 @@ pub enum Group {
 /// # Errors
 ///
 /// This function will return an error if .
-pub fn process_lily() -> Result<(), std::io::Error> {
+pub fn process_lily() -> Result<Tune, std::io::Error> {
     let f = File::open("music/atholl_highlanders.ly")?;
     let reader = BufReader::new(f);
 
@@ -35,15 +35,21 @@ pub fn process_lily() -> Result<(), std::io::Error> {
     let bar_regex =
         Regex::new(r"^(?:\s*\[?\s*(?:\\[a-zA-Z]+|[GabcdefgA]\d\.?)\s*\]?\s*)+\|$").unwrap();
 
+    let mut bars = Vec::new();
     for line in lines {
         let line = line?;
         if bar_regex.is_match(&line) {
             let bar = process_bar(&line);
-            println!("{bar}");
+            bars.push(bar);
         }
     }
+    let parts = vec![Part { bars }];
 
-    Ok(())
+    let tune = Tune {
+        name: String::from("Atholl Highlanders"),
+        parts,
+    };
+    Ok(tune)
 }
 
 fn process_bar(line: &str) -> Measure {
