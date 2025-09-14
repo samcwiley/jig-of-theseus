@@ -1,6 +1,7 @@
 #![allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 use std::fmt;
 
+#[derive(Debug, Clone)]
 pub struct Note {
     pub pitch: Pitch,
     pub duration: Duration,
@@ -50,6 +51,8 @@ impl fmt::Display for Pitch {
         write!(f, "{pitch}")
     }
 }
+
+#[derive(Clone, Debug)]
 pub enum Duration {
     ThirtySecond,
     Sixteenth,
@@ -102,6 +105,7 @@ impl fmt::Display for Duration {
     }
 }
 
+#[derive(Debug, Clone)]
 pub enum Embellishment {
     GraceNote(Pitch),
     Doubling(Pitch),
@@ -131,6 +135,18 @@ pub enum Embellishment {
     Darodo,
     Hodro,
     Hiotro,
+}
+
+impl Embellishment {
+    #[must_use]
+    pub fn new() -> Self {
+        Self::GraceNote(Pitch::HighG)
+    }
+}
+impl Default for Embellishment {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl fmt::Display for Embellishment {
@@ -168,6 +184,7 @@ impl fmt::Display for Embellishment {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Measure {
     pub notes: Vec<Note>,
 }
