@@ -20,6 +20,9 @@ impl MusicWriter for BMWWriter {
             duration,
             embellishment,
         } = note;
+        let bmw_pitch = get_bmw_pitch(pitch);
+        let bmw_duration = get_bmw_duration(duration, pitch);
+        Ok()
     }
 
     fn write_measure(&mut self, measure: &Measure) -> std::io::Result<()> {
@@ -49,6 +52,29 @@ fn get_bmw_pitch(pitch: &Pitch) -> &'static str {
     }
 }
 
+/// For use in dots and embellishments
+struct BMWLowercase {
+    pitch: Pitch,
+}
+
+/// for writing pitches in dots and embellishments
+impl fmt::Display for BMWLowercase {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let lowercase_pitch = match self.pitch {
+            Pitch::LowG => "lg",
+            Pitch::LowA => "la",
+            Pitch::B => "b",
+            Pitch::C => "c",
+            Pitch::D => "d",
+            Pitch::E => "e",
+            Pitch::F => "f",
+            Pitch::HighG => "hg",
+            Pitch::HighA => "ha",
+        };
+        write!(f, "{lowercase_pitch}")
+    }
+}
+
 struct Dot {
     pitch: Pitch,
 }
@@ -63,18 +89,7 @@ impl Dot {
 
 impl fmt::Display for Dot {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let dot = match self.pitch {
-            Pitch::LowG => "'lg",
-            Pitch::LowA => "'la",
-            Pitch::B => "'b",
-            Pitch::C => "'c",
-            Pitch::D => "'d",
-            Pitch::E => "'e",
-            Pitch::F => "'f",
-            Pitch::HighG => "'hg",
-            Pitch::HighA => "'ha",
-        };
-        write!(f, "{dot}")
+        write!(f, "'{}", self.pitch)
     }
 }
 
@@ -110,3 +125,7 @@ fn get_bmw_duration(duration: &Duration, pitch: &Pitch) -> BMWDuration {
     };
     BMWDuration { stem_value, dot }
 }
+
+/*fn get_bmw_embellishment(embellishment: &Embellishment) -> &'static str {
+    match Emb
+}*/
