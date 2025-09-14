@@ -188,7 +188,7 @@ fn get_lily_embellishment(embellishment: &Embellishment) -> String {
         Embellishment::LGCrunluath => String::from("\\Gcrun"),
         Embellishment::HeavyCrunluath => String::from("\\pgrace { G32[ d G e G f G }"),
         Embellishment::HeavyBCrunluath => String::from("\\pgrace { G32[ b G e G f G] }"),
-        // took me to realize these had the same grace notes
+        // took me a minute to realize these had the same grace notes
         Embellishment::Edre | Embellishment::Endari => String::from("\\dre"),
         Embellishment::Dare => String::from("\\dare"),
         Embellishment::Chedari => String::from("\\dari"),

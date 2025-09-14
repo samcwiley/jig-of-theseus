@@ -1,5 +1,4 @@
 use crate::ir::{Duration, Embellishment, Measure, Note, Part, Pitch, Tune};
-use regex::Regex;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
@@ -8,8 +7,6 @@ pub enum Group {
     Note,
     Embellishment,
 }
-
-// pub fn make_lily_note(embellishment: Option<Embellishment>)
 
 /// .
 ///
@@ -26,24 +23,50 @@ pub fn process_lily() -> Result<Tune, std::io::Error> {
 
     let mut lines = reader.lines();
 
+    // skip everything until the actual tune starts
     for meta in lines.by_ref() {
         if meta? == "atholl_highlanders = {" {
             break;
         }
     }
 
-    let bar_regex =
-        Regex::new(r"^(?:\s*\[?\s*(?:\\[a-zA-Z]+|[GabcdefgA]\d\.?)\s*\]?\s*)+\|$").unwrap();
+    // getting time signature as a string
+    let _time_signature = {
+        if let Some(line) = lines.next() {
+            let time_line = line?.trim().to_owned();
+            if let Some(sig) = time_line.strip_prefix("\\time ") {
+                sig.to_owned()
+            } else {
+                eprintln!("Could not parse time signature");
+                String::new()
+            }
+        } else {
+            eprintln!("Empty file");
+            String::new()
+        }
+    };
 
+    let mut parts = Vec::new();
     let mut bars = Vec::new();
     for line in lines {
         let line = line?;
-        if bar_regex.is_match(&line) {
-            let bar = process_bar(&line);
-            bars.push(bar);
+        let line = line.trim();
+        // start new part
+        if line == "\\repeat volta 2 {" {
+            bars = Vec::new();
+        // end part
+        } else if line == "}" && !bars.is_empty() {
+            parts.push(Part { bars: bars.clone() });
+            bars = Vec::new();
+        // end tune
+        } else if line == "}" {
+            break;
+        // music time
+        } else if line == "\\break" {
+        } else {
+            bars.push(process_bar(line));
         }
     }
-    let parts = vec![Part { bars }];
 
     let tune = Tune {
         name: String::from("Atholl Highlanders"),
@@ -53,52 +76,62 @@ pub fn process_lily() -> Result<Tune, std::io::Error> {
 }
 
 fn process_bar(line: &str) -> Measure {
-    let mut tokenized_bar = Vec::new();
-    let extract_regex =
-        Regex::new(r"(?<embellishment>\\[a-zA-Z]+)|(?<note>[GabcdefgA]\d\.?)").unwrap();
-    let captures = extract_regex.captures_iter(line);
-    for capture in captures {
-        if let Some(m) = capture.name("embellishment") {
-            tokenized_bar.push((Group::Embellishment, m.as_str().to_string()));
-        } else if let Some(m) = capture.name("note") {
-            tokenized_bar.push((Group::Note, m.as_str().to_string()));
-        }
-    }
-    let mut current_embellishment = None;
+    let line = line.replace(['[', ']', '|'], "");
     let mut notes = Vec::new();
-    for token in tokenized_bar {
-        if token.0 == Group::Embellishment {
-            current_embellishment = Some(process_lily_embellishment(&token.1));
-        } else if token.0 == Group::Note {
-            notes.push(process_lily_note(&token.1, current_embellishment));
-            current_embellishment = None;
+    let mut embellishment = None;
+    for token in line.split_ascii_whitespace() {
+        if token.starts_with('\\') {
+            embellishment = Some(process_lily_embellishment(token));
+        } else {
+            let note = process_lily_note(token, embellishment);
+            notes.push(note);
+            embellishment = None;
         }
     }
     Measure { notes }
 }
 
 fn process_lily_embellishment(embellishment: &str) -> Embellishment {
-    match embellishment {
-        r"\grg" => Embellishment::GraceNote(Pitch::HighG),
-        r"\grd" => Embellishment::GraceNote(Pitch::D),
-        r"\gre" => Embellishment::GraceNote(Pitch::E),
-        _ => panic!("Invalid embellishment {embellishment}"),
+    if let Some(grace_note_pitch) = embellishment.strip_prefix("\\gr") {
+        Embellishment::GraceNote(process_lily_pitch(grace_note_pitch.as_bytes()[0]))
+    } else if let Some(doubling_pitch) = embellishment.strip_prefix("\\dbl") {
+        Embellishment::GraceNote(process_lily_pitch(doubling_pitch.as_bytes()[0]))
+    } else if let Some(half_doubling_pitch) = embellishment.strip_prefix("\\hdbl") {
+        Embellishment::HalfDoubling(process_lily_pitch(half_doubling_pitch.as_bytes()[0]))
+    } else if let Some(thumb_doubling_pitch) = embellishment.strip_prefix("\\tdbl") {
+        Embellishment::ThumbDoubling(process_lily_pitch(thumb_doubling_pitch.as_bytes()[0]))
+    } else if let Some(slur_pitch) = embellishment.strip_prefix("\\slur") {
+        Embellishment::Slur(process_lily_pitch(slur_pitch.as_bytes()[0]))
+    } else if let Some(hornpipe_shake_pitch) = embellishment.strip_prefix("\\shake") {
+        Embellishment::HornpipeShake(process_lily_pitch(hornpipe_shake_pitch.as_bytes()[0]))
+    } else {
+        match embellishment {
+            "\\grip" => Embellishment::Grip,
+            "\\bgrip" => Embellishment::BGrip,
+            "\\taor" => Embellishment::Taorluath,
+            "\\btaor" => Embellishment::BTaorluath,
+            "\\Gtaor" => Embellishment::LGTaorluath,
+            "\\thrwd" => Embellishment::ThrowD,
+            "\\crun" => Embellishment::Crunluath,
+            "\\dcrun" => Embellishment::BCrunluath,
+            "\\Gcrun" => Embellishment::LGCrunluath,
+            "\\dre" => Embellishment::Edre,
+            "\\dare" => Embellishment::Dare,
+            "\\dari" => Embellishment::Chedari,
+            "\\bari" => Embellishment::Embari,
+            "\\wbirl" => Embellishment::Birl,
+            "\\birl" => Embellishment::Abirl,
+            "\\gbirl" => Embellishment::Gbirl,
+            "\\darodo" => Embellishment::Darodo,
+            "\\catchc" => Embellishment::Hodro,
+            "\\catchb" => Embellishment::Hiotro,
+            _ => panic!("Unrecognized embellishment {embellishment}"),
+        }
     }
 }
 
 fn process_lily_note(note: &str, embellishment: Option<Embellishment>) -> Note {
-    let pitch = match note.as_bytes()[0] {
-        b'G' => Pitch::LowG,
-        b'a' => Pitch::LowA,
-        b'b' => Pitch::B,
-        b'c' => Pitch::C,
-        b'd' => Pitch::D,
-        b'e' => Pitch::E,
-        b'f' => Pitch::F,
-        b'g' => Pitch::HighG,
-        b'A' => Pitch::HighA,
-        _ => panic!("Invalid Pitch in {note}"),
-    };
+    let pitch = process_lily_pitch(note.as_bytes()[0]);
     let duration = match &note.as_bytes()[1..] {
         b"8" => Duration::Eighth,
         b"4" => Duration::Quarter,
@@ -109,5 +142,20 @@ fn process_lily_note(note: &str, embellishment: Option<Embellishment>) -> Note {
         pitch,
         duration,
         embellishment,
+    }
+}
+
+fn process_lily_pitch(pitch: u8) -> Pitch {
+    match pitch {
+        b'G' => Pitch::LowG,
+        b'a' => Pitch::LowA,
+        b'b' => Pitch::B,
+        b'c' => Pitch::C,
+        b'd' => Pitch::D,
+        b'e' => Pitch::E,
+        b'f' => Pitch::F,
+        b'g' => Pitch::HighG,
+        b'A' => Pitch::HighA,
+        _ => panic!("Invalid Pitch found {pitch}"),
     }
 }
