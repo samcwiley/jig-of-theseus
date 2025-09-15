@@ -199,6 +199,7 @@ fn get_lily_embellishment(embellishment: &Embellishment) -> String {
         Embellishment::Darodo => String::from("\\darodo"),
         Embellishment::Hodro => String::from("\\catchc"),
         Embellishment::Hiotro => String::from("\\catchb"),
+        Embellishment::Tie(_) => String::from("~"),
     }
 }
 
