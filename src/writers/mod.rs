@@ -1,5 +1,6 @@
 use crate::ir::{Measure, Note, Part, Tune};
 
+pub mod bmw;
 pub mod lilypond;
 
 pub trait MusicWriter {

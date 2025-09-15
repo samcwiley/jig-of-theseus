@@ -35,6 +35,24 @@ pub enum Pitch {
     HighG,
     HighA,
 }
+
+impl Pitch {
+    pub fn from_lily_char(pitch: char) -> Self {
+        match pitch {
+            'G' => Self::LowG,
+            'a' => Self::LowA,
+            'B' => Self::B,
+            'C' => Self::C,
+            'D' => Self::D,
+            'E' => Self::E,
+            'F' => Self::F,
+            'g' => Self::HighG,
+            'A' => Self::HighA,
+            _ => panic!("invalid lily note character \"{pitch}\""),
+        }
+    }
+}
+
 impl fmt::Display for Pitch {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let pitch = match self {
