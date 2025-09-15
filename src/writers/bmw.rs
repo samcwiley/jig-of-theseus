@@ -218,5 +218,6 @@ fn get_bmw_embellishment(embellishment: &Embellishment) -> &'static str {
         Embellishment::Darodo => todo!(),
         Embellishment::Hodro => todo!(),
         Embellishment::Hiotro => todo!(),
+        Embellishment::Tie(pitch) => todo!(),
     }
 }

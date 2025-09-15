@@ -153,6 +153,7 @@ pub enum Embellishment {
     Darodo,
     Hodro,
     Hiotro,
+    Tie(Pitch),
 }
 
 impl Embellishment {
@@ -197,6 +198,7 @@ impl fmt::Display for Embellishment {
             Embellishment::Hodro => "Hodro",
             Embellishment::Hiotro => "Hiotro",
             Embellishment::HeavyCrunluath => "Heavy Crunluath",
+            Embellishment::Tie(_) => "Tie",
         };
         write!(f, "{embellishment}")
     }
