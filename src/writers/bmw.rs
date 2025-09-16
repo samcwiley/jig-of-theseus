@@ -9,7 +9,7 @@ use crate::{
     writers::MusicWriter,
 };
 
-/// Wraps BufWriter with functions for writing `.bww` files
+/// Wraps `BufWriter` with functions for writing `.bww` files
 pub struct BMWWriter {
     pub writer: BufWriter<File>,
 }
@@ -46,7 +46,19 @@ impl BMWWriter {
     /// Handles writing a note with beaming or calls off to a standard, non-beamed note writer
     fn write_bmw_note(&mut self, note: &Note, beam_side: Option<BeamSide>) -> std::io::Result<()> {
         if let Some(beam_side) = beam_side {
-            todo!()
+            let Note {
+                pitch,
+                duration,
+                embellishment,
+            } = note;
+            let embellishment = embellishment.as_ref().expect("couldn't read embellishment");
+            let bmw_pitch = get_bmw_pitch(pitch);
+            let bmw_duration = get_bmw_duration(duration, pitch);
+            write!(
+                self.writer,
+                "{embellishment} {bmw_pitch}{beam_side}{bmw_duration}"
+            )?;
+            Ok(())
         } else {
             self.write_note(note)
         }
@@ -61,9 +73,10 @@ impl MusicWriter for BMWWriter {
             duration,
             embellishment,
         } = note;
+        let embellishment = embellishment.as_ref().expect("couldn't read embellishment");
         let bmw_pitch = get_bmw_pitch(pitch);
         let bmw_duration = get_bmw_duration(duration, pitch);
-
+        write!(self.writer, "{embellishment} {bmw_pitch}{bmw_duration}")?;
         Ok(())
     }
 
@@ -168,7 +181,7 @@ impl fmt::Display for BMWDuration {
     }
 }
 
-/// Takes in duration and pitch and returns a [BMWDuration] object containing a
+/// Takes in duration and pitch and returns a [`BMWDuration`] object containing a
 /// stem value (2, 4, 8, etc) and an optional dot on the provided pitch
 fn get_bmw_duration(duration: &Duration, pitch: &Pitch) -> BMWDuration {
     let (stem_value, dot) = match duration {
@@ -187,14 +200,35 @@ fn get_bmw_duration(duration: &Duration, pitch: &Pitch) -> BMWDuration {
     BMWDuration { stem_value, dot }
 }
 
-/// For writing out embellishments in BMW
+/// For writing out embellishments in BMW. The embellishments marked `todo!()` I
+/// could not find examples of in tunes
 fn get_bmw_embellishment(embellishment: &Embellishment) -> String {
     match embellishment {
-        Embellishment::GraceNote(pitch) => todo!(),
+        Embellishment::GraceNote(pitch) => match pitch {
+            Pitch::B => todo!(),
+            Pitch::LowG | Pitch::LowA | Pitch::C | Pitch::F => {
+                format!("str{}", BMWLowercase::new(pitch))
+            }
+            Pitch::D | Pitch::E | Pitch::HighG => format!("{}g", BMWLowercase::new(pitch)),
+            Pitch::HighA => String::from("tg"),
+        },
         Embellishment::Doubling(pitch) => format!("db{}", BMWLowercase::new(pitch)),
         Embellishment::HalfDoubling(pitch) => format!("hdb{}", BMWLowercase::new(pitch)),
         Embellishment::ThumbDoubling(pitch) => format!("tdb{}", BMWLowercase::new(pitch)),
-        Embellishment::Slur(pitch) => todo!(),
+        Embellishment::Slur(pitch) => {
+            match pitch {
+                Pitch::LowG => unimplemented!("This shouldn't be possible"),
+                Pitch::LowA => todo!(),
+                Pitch::B => String::from("gstb"),
+                Pitch::C => todo!(),
+                // todo!() light d strike
+                Pitch::D => String::from("lgstd"),
+                Pitch::E => todo!(),
+                Pitch::F => todo!(),
+                Pitch::HighG => todo!(),
+                Pitch::HighA => String::from("dblha"),
+            }
+        }
         Embellishment::HornpipeShake(pitch) => format!("pel{}", BMWLowercase::new(pitch)),
         Embellishment::Grip => String::from("grp"),
         Embellishment::BGrip => String::from("grpb"),
