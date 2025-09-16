@@ -56,7 +56,7 @@ impl BMWWriter {
             let bmw_duration = get_bmw_duration(duration, pitch);
             write!(
                 self.writer,
-                "{embellishment} {bmw_pitch}{beam_side}{bmw_duration}"
+                "{embellishment} {bmw_pitch}{beam_side}_{bmw_duration}"
             )?;
             Ok(())
         } else {
@@ -76,7 +76,7 @@ impl MusicWriter for BMWWriter {
         let embellishment = embellishment.as_ref().expect("couldn't read embellishment");
         let bmw_pitch = get_bmw_pitch(pitch);
         let bmw_duration = get_bmw_duration(duration, pitch);
-        write!(self.writer, "{embellishment} {bmw_pitch}{bmw_duration}")?;
+        write!(self.writer, "{embellishment} {bmw_pitch}_{bmw_duration}")?;
         Ok(())
     }
 
