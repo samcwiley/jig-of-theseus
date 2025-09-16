@@ -37,6 +37,12 @@ pub enum Pitch {
 }
 
 impl Pitch {
+    /// Converts lilypond note character to a Pitch object
+    ///
+    /// # Panics
+    ///
+    /// Panics if a provided lilypond note is invalid
+    #[must_use]
     pub fn from_lily_char(pitch: char) -> Self {
         match pitch {
             'G' => Self::LowG,
