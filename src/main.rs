@@ -1,4 +1,5 @@
 #![warn(clippy::pedantic)]
+#![allow(clippy::cast_precision_loss)]
 use std::{fs::File, io::BufWriter};
 
 use crate::{
@@ -19,3 +20,4 @@ mod parsers;
 mod writers;
 pub use crate::parsers::*;
 mod test;
+mod utils;

@@ -1,5 +1,8 @@
 #![allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+//use crate::utils::math::assert_fp_eq;
 use std::fmt;
+
+use crate::utils::math::f32_eq;
 
 #[derive(Debug, Clone)]
 pub struct Note {
@@ -321,13 +324,18 @@ impl Measure {
     /// For checking if a measure has the correct amount of beats
     #[must_use]
     pub fn validate(&self) -> bool {
-        self.notes.iter().map(|n| n.duration.eighths()).sum::<f32>()
-            == self.time_signature.eights_per_bar() as f32
+        f32_eq(
+            self.notes.iter().map(|n| n.duration.eighths()).sum::<f32>(),
+            self.time_signature.eights_per_bar() as f32,
+        )
     }
 
     /// For examining the notes within a measure and figuring how the notes
-    /// should be beamed
-    /// todo: add in logic for ties
+    /// should be beamed todo: add in logic for ties
+    /// # Panics
+    ///
+    /// Will panic if the bar has an improper amount of beats, todo: probably
+    /// remove this
     #[must_use]
     pub fn get_beats(&self) -> Vec<Beat> {
         assert!(self.validate(), "Invalid number of beats in bar");
@@ -345,12 +353,15 @@ impl Measure {
                 current_beat = Beat::new();
                 current_beat.notes.push(note.clone());
             }
-            if current_beat.eighths() == eighths_per_beat {
+            if f32_eq(current_beat.eighths(), eighths_per_beat) {
                 beats.push(current_beat);
                 current_beat = Beat::new();
             }
         }
-        assert!(beats.iter().map(|beat| beat.eighths()).sum::<f32>() == total_eighths);
+        assert!(f32_eq(
+            beats.iter().map(Beat::eighths).sum::<f32>(),
+            total_eighths
+        ));
         beats
     }
 }
