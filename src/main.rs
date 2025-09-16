@@ -18,3 +18,4 @@ fn main() -> Result<(), std::io::Error> {
 mod parsers;
 mod writers;
 pub use crate::parsers::*;
+mod test;

@@ -308,6 +308,15 @@ impl Default for Beat {
     }
 }
 
+impl fmt::Display for Beat {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for note in &self.notes {
+            write!(f, "{note} ")?;
+        }
+        Ok(())
+    }
+}
+
 impl Measure {
     /// For checking if a measure has the correct amount of beats
     #[must_use]
@@ -322,27 +331,26 @@ impl Measure {
     #[must_use]
     pub fn get_beats(&self) -> Vec<Beat> {
         assert!(self.validate(), "Invalid number of beats in bar");
-        let total_eighths = self.time_signature.eights_per_bar();
+        let total_eighths = self.time_signature.eights_per_bar() as f32;
         let total_beats = self.time_signature.beats_per_bar();
         let eighths_per_beat = self.time_signature.eights_per_beat() as f32;
         let mut beats = Vec::with_capacity(total_beats);
         let mut current_beat = Beat::new();
 
         for note in &self.notes {
-            // check if the current beat is smaller than its intended size and
-            // if the new note can fit into the current beat
-            if current_beat.eighths() < eighths_per_beat {
-                if note.duration.eighths() <= eighths_per_beat {
-                    current_beat.push(note);
-                }
+            if note.duration.eighths() <= eighths_per_beat - current_beat.eighths() {
+                current_beat.notes.push(note.clone());
             } else {
+                beats.push(current_beat);
+                current_beat = Beat::new();
+                current_beat.notes.push(note.clone());
+            }
+            if current_beat.eighths() == eighths_per_beat {
                 beats.push(current_beat);
                 current_beat = Beat::new();
             }
         }
-
+        assert!(beats.iter().map(|beat| beat.eighths()).sum::<f32>() == total_eighths);
         beats
     }
 }
-
-// #[test]

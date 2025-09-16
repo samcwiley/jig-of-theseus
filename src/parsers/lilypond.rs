@@ -76,7 +76,10 @@ pub fn process_lily() -> Result<Tune, std::io::Error> {
     Ok(tune)
 }
 
-fn process_bar(line: &str) -> Measure {
+/// Processes a string slice into a lilypond bar
+/// todo: get `time_signature` from tune
+#[must_use]
+pub fn process_bar(line: &str) -> Measure {
     let line = line.replace(['[', ']', '|'], "");
     let mut notes = Vec::new();
     let mut embellishment = None;
