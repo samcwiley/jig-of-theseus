@@ -213,13 +213,7 @@ impl fmt::Display for Embellishment {
 #[derive(Debug, Clone)]
 pub struct Measure {
     pub notes: Vec<Note>,
-}
-
-impl Measure {
-    #[must_use]
-    pub fn validate(&self) -> bool {
-        self.notes.iter().map(|n| n.duration.eighths()).sum::<f32>() as usize == 6
-    }
+    pub time_signature: TimeSignature,
 }
 
 impl fmt::Display for Measure {
@@ -246,6 +240,7 @@ impl fmt::Display for Part {
 pub struct Tune {
     pub name: String,
     pub parts: Vec<Part>,
+    pub time_signature: TimeSignature,
 }
 
 impl fmt::Display for Tune {
@@ -258,3 +253,96 @@ impl fmt::Display for Tune {
         Ok(())
     }
 }
+
+#[derive(Debug, Clone)]
+pub enum TimeSignature {
+    SixEight,
+}
+
+impl TimeSignature {
+    fn eights_per_beat(&self) -> usize {
+        match self {
+            TimeSignature::SixEight => 3,
+        }
+    }
+    fn beats_per_bar(&self) -> usize {
+        match self {
+            TimeSignature::SixEight => 2,
+        }
+    }
+    fn eights_per_bar(&self) -> usize {
+        self.eights_per_beat() * self.beats_per_bar()
+    }
+}
+
+impl fmt::Display for TimeSignature {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let sig = match self {
+            Self::SixEight => "6/8",
+        };
+        write!(f, "{sig}")
+    }
+}
+
+pub struct Beat {
+    pub notes: Vec<Note>,
+}
+
+impl Beat {
+    #[must_use]
+    pub fn new() -> Self {
+        Self { notes: Vec::new() }
+    }
+    #[must_use]
+    pub fn eighths(&self) -> f32 {
+        self.notes.iter().map(|n| n.duration.eighths()).sum::<f32>()
+    }
+    pub fn push(&mut self, note: &Note) {
+        self.notes.push(note.clone());
+    }
+}
+
+impl Default for Beat {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Measure {
+    /// For checking if a measure has the correct amount of beats
+    #[must_use]
+    pub fn validate(&self) -> bool {
+        self.notes.iter().map(|n| n.duration.eighths()).sum::<f32>()
+            == self.time_signature.eights_per_bar() as f32
+    }
+
+    /// For examining the notes within a measure and figuring how the notes
+    /// should be beamed
+    /// todo: add in logic for ties
+    #[must_use]
+    pub fn get_beats(&self) -> Vec<Beat> {
+        assert!(self.validate(), "Invalid number of beats in bar");
+        let total_eighths = self.time_signature.eights_per_bar();
+        let total_beats = self.time_signature.beats_per_bar();
+        let eighths_per_beat = self.time_signature.eights_per_beat() as f32;
+        let mut beats = Vec::with_capacity(total_beats);
+        let mut current_beat = Beat::new();
+
+        for note in &self.notes {
+            // check if the current beat is smaller than its intended size and
+            // if the new note can fit into the current beat
+            if current_beat.eighths() < eighths_per_beat {
+                if note.duration.eighths() <= eighths_per_beat {
+                    current_beat.push(note);
+                }
+            } else {
+                beats.push(current_beat);
+                current_beat = Beat::new();
+            }
+        }
+
+        beats
+    }
+}
+
+// #[test]

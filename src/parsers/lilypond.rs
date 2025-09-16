@@ -1,4 +1,4 @@
-use crate::ir::{Duration, Embellishment, Measure, Note, Part, Pitch, Tune};
+use crate::ir::{Duration, Embellishment, Measure, Note, Part, Pitch, TimeSignature, Tune};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
@@ -71,6 +71,7 @@ pub fn process_lily() -> Result<Tune, std::io::Error> {
     let tune = Tune {
         name: String::from("Atholl Highlanders"),
         parts,
+        time_signature: TimeSignature::SixEight,
     };
     Ok(tune)
 }
@@ -88,7 +89,10 @@ fn process_bar(line: &str) -> Measure {
             embellishment = None;
         }
     }
-    Measure { notes }
+    Measure {
+        notes,
+        time_signature: TimeSignature::SixEight,
+    }
 }
 
 fn process_lily_embellishment(embellishment: &str) -> Embellishment {
