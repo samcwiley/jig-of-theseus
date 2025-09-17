@@ -21,6 +21,7 @@ pub enum BeamSide {
     Right,
 }
 
+/*
 impl BeamSide {
     /// For quickly creating beams
     fn from(side: char) -> Self {
@@ -31,6 +32,7 @@ impl BeamSide {
         }
     }
 }
+*/
 
 impl fmt::Display for BeamSide {
     /// Writes beams for use in beamed 8th notes, etc.
@@ -52,13 +54,18 @@ impl BMWWriter {
                 duration,
                 embellishment,
             } = note;
-            let embellishment = embellishment.as_ref().expect("couldn't read embellishment");
             let bmw_pitch = get_bmw_pitch(pitch);
             let bmw_duration = get_bmw_duration(duration, pitch);
-            write!(
-                self.writer,
-                "{embellishment} {bmw_pitch}{beam_side}_{bmw_duration}"
-            )?;
+            if let Some(embellishment) = embellishment {
+                let bmw_embellishment = get_bmw_embellishment(embellishment);
+                write!(
+                    self.writer,
+                    "{bmw_embellishment} {bmw_pitch}{beam_side}_{bmw_duration}"
+                )?;
+            } else {
+                write!(self.writer, "{bmw_pitch}{beam_side}_{bmw_duration}")?;
+            }
+
             Ok(())
         } else {
             self.write_note(note)
@@ -102,28 +109,87 @@ impl MusicWriter for BMWWriter {
             duration,
             embellishment,
         } = note;
-        let embellishment = embellishment.as_ref().expect("couldn't read embellishment");
         let bmw_pitch = get_bmw_pitch(pitch);
         let bmw_duration = get_bmw_duration(duration, pitch);
-        write!(self.writer, "{embellishment} {bmw_pitch}_{bmw_duration}")?;
+        if let Some(embellishment) = embellishment {
+            let bmw_embellishment = get_bmw_embellishment(embellishment);
+            write!(
+                self.writer,
+                "{bmw_embellishment} {bmw_pitch}_{bmw_duration}"
+            )?;
+        } else {
+            write!(self.writer, "{bmw_pitch}_{bmw_duration}")?;
+        }
+
         Ok(())
     }
 
     /// Writes out a full measure of notes; handles beaming logic
     fn write_measure(&mut self, measure: &Measure) -> std::io::Result<()> {
+        write!(self.writer, "!\t")?;
         let beats = measure.get_beats();
+        let note_beams_vec = beats.iter().map(get_beams);
+        for (beat, note_beams) in beats.iter().zip(note_beams_vec) {
+            for (note, beam_side) in beat.notes.iter().zip(note_beams) {
+                self.write_bmw_note(note, beam_side)?;
+                write!(self.writer, "\t")?;
+            }
+        }
+        writeln!(self.writer)?;
         Ok(())
     }
 
     /// Writes a series of measures; handles barline logic
     fn write_part(&mut self, part: &Part) -> std::io::Result<()> {
-        todo!()
+        writeln!(self.writer, "New part")?;
+        for measure in &part.bars {
+            self.write_measure(measure)?;
+        }
+        Ok(())
     }
 
     /// Writes a series of parts along with requisite metadata used in BMW files
     fn write_tune(&mut self, tune: &Tune) -> std::io::Result<()> {
-        todo!()
+        writeln!(self.writer, "Atholl highlanders")?;
+        for part in &tune.parts {
+            self.write_part(part)?;
+        }
+        Ok(())
     }
+}
+
+pub fn write_bmw_file(writer: &mut BMWWriter, tune: &Tune) -> std::io::Result<()> {
+    let pre_tune_junk = r#"
+```bww
+Bagpipe Reader:1.0
+
+MIDINoteMappings,(54,56,58,59,61,63,64,66,68,56,58,60,61,63,65,66,68,70,55,57,59,60,62,64,65,67,69)
+
+FrequencyMappings,(370,415,466,494,554,622,659,740,831,415,466,523,554,622,699,740,831,932,392,440,494,523,587,659,699,784,880)
+
+InstrumentMappings,(71,71,45,33,1000,60,70)
+
+GracenoteDurations,(20,40,30,50,100,200,800,1200,250,250,250,500,200)
+
+FontSizes,(100,100,65,70,300)
+
+TuneTempo,110
+
+TuneFormat,(1,1,F,L,500,500,500,500,L,0,0)
+
+"Atholl Highlanders",(T,L,0,0,Times New Roman,16,700,0,0,18,0,0,0)
+
+"Jig",(Y,C,0,0,Times New Roman,14,400,0,0,18,0,0,0)
+
+"Trad.",(M,R,0,0,Times New Roman,14,400,0,0,18,0,0,0)
+
+"",(F,R,0,0,Times New Roman,10,400,0,0,18,0,0,0)
+
+```
+    "#;
+    write!(writer.writer, "{pre_tune_junk}")?;
+    writer.write_tune(tune)?;
+    Ok(())
 }
 
 /// For getting display pitches used in notes
