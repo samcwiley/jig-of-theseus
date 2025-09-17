@@ -5,7 +5,7 @@ use std::{
 };
 
 use crate::{
-    ir::{Duration, Embellishment, Measure, Note, Part, Pitch, Tune},
+    ir::{Beat, Duration, Embellishment, Measure, Note, Part, Pitch, Tune},
     writers::MusicWriter,
 };
 
@@ -15,7 +15,8 @@ pub struct BMWWriter {
 }
 
 /// Enum for handling beam directions for beamed 8th notes, 16ths, etc.
-enum BeamSide {
+#[derive(PartialEq, Debug)]
+pub enum BeamSide {
     Left,
     Right,
 }
@@ -65,6 +66,34 @@ impl BMWWriter {
     }
 }
 
+pub fn get_beams(beat: &Beat) -> Vec<Option<BeamSide>> {
+    let num_notes = beat.notes.len();
+    let mut beams = Vec::with_capacity(num_notes);
+    let mut i = 0;
+    let mut has_right = false;
+    while i < num_notes {
+        if !beat.notes[i].duration.is_beamed() {
+            // if it's not a beamed note (e.g. 8th, 16th, 32, etc): none
+            beams.push(None);
+        } else if has_right {
+            // if we already have a right beam, this one points left
+            beams.push(Some(BeamSide::Left));
+        } else if beat.notes.len() > i + 1 && beat.notes[i + 1].duration.is_beamed() {
+            // if the next note wants a beam and this one also does, give it a
+            // right, and set has_right to true
+            beams.push(Some(BeamSide::Right));
+            has_right = true;
+        } else {
+            // this means it's a flagged note but not next to another flagged
+            // note, so no beam
+            beams.push(None);
+        }
+        i += 1;
+    }
+
+    beams
+}
+
 impl MusicWriter for BMWWriter {
     /// Writes note without beaming
     fn write_note(&mut self, note: &Note) -> std::io::Result<()> {
@@ -82,7 +111,8 @@ impl MusicWriter for BMWWriter {
 
     /// Writes out a full measure of notes; handles beaming logic
     fn write_measure(&mut self, measure: &Measure) -> std::io::Result<()> {
-        todo!()
+        let beats = measure.get_beats();
+        Ok(())
     }
 
     /// Writes a series of measures; handles barline logic
