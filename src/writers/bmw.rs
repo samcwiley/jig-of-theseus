@@ -305,7 +305,8 @@ fn get_bmw_embellishment(embellishment: &Embellishment) -> String {
             Pitch::LowG | Pitch::LowA | Pitch::C | Pitch::F => {
                 format!("str{}", BMWLowercase::new(pitch))
             }
-            Pitch::D | Pitch::E | Pitch::HighG => format!("{}g", BMWLowercase::new(pitch)),
+            Pitch::HighG => String::from("gg"),
+            Pitch::D | Pitch::E => format!("{}g", BMWLowercase::new(pitch)),
             Pitch::HighA => String::from("tg"),
         },
         Embellishment::Doubling(pitch) => format!("db{}", BMWLowercase::new(pitch)),
