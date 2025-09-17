@@ -111,6 +111,22 @@ impl Duration {
             Duration::DottedWhole => 12.0,
         }
     }
+    #[must_use]
+    pub fn is_beamed(&self) -> bool {
+        match self {
+            Duration::Quarter
+            | Duration::Half
+            | Duration::Whole
+            | Duration::DottedQuarter
+            | Duration::DottedHalf
+            | Duration::DottedWhole => false,
+            Duration::ThirtySecond
+            | Duration::Sixteenth
+            | Duration::Eighth
+            | Duration::DottedSixteenth
+            | Duration::DottedEighth => true,
+        }
+    }
 }
 
 impl fmt::Display for Duration {
@@ -358,10 +374,10 @@ impl Measure {
                 current_beat = Beat::new();
             }
         }
-        assert!(f32_eq(
-            beats.iter().map(Beat::eighths).sum::<f32>(),
-            total_eighths
-        ));
+        assert!(
+            f32_eq(beats.iter().map(Beat::eighths).sum::<f32>(), total_eighths),
+            "beats don't add up at end"
+        );
         beats
     }
 }
