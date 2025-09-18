@@ -175,6 +175,11 @@ fn get_lily_duration(duration: &Duration) -> &'static str {
 }
 
 fn get_lily_embellishment(embellishment: &Embellishment) -> String {
+    // todo: add half shakes, remove tdblA, light/heavy shakes, light/heavy
+    // slurs, add half shakes, remove low g shakes and slurs, add half slurs,
+    // add catches, add half catches, add thumb catches, add low g d throw, add
+    // heavy d throw, add dbirl, add hadeda (e grip), add redundant taorluath,
+    // add taorluath a mach,, etc.
     match embellishment {
         Embellishment::GraceNote(pitch) => format!("\\gr{}", get_lily_pitch(pitch)),
         Embellishment::Doubling(pitch) => format!("\\dbl{}", get_lily_pitch(pitch)),
