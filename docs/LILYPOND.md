@@ -46,3 +46,63 @@ If grace notes are used in any of the beamed notes after the first, these should
 
 Example: a 16th note on e, followed by a dotted 8th on low a with a g grace note, followed by a c with a d grace note: `e16 [\grg a8. \grd c8]`
 
+## Grace Notes and Embellishments
+
+These are all escaped macros starting with a `\` character. 
+
+### Single Gracenotes
+
+Simply use `\gr` to signify a grace note, followed by the corresponding letter to designate the pitch. This gives a grace note scale: `\grG`, `\gra`, `\grb`, `\grc`, `\grd`, `\gre`, `\grf`, `\grg`, `\grA`.
+
+### Doublings
+
+Like single gracenotes, all doublings are `\dbl` followed by their respective pitch.
+
+Example: D doubling: `\dbld`
+
+### Thumb Doublings
+
+Prepend the proper doubling with `t` after the escape character.
+
+Example: Thumb doubling on F: `\tdblf`
+
+*Note:* thumb doublings on High A are unavailable.
+
+### Half Doublings
+
+Prepend the proper doubling with `h` after the escape character.
+
+Example: Half doubling on e: `\hdble`.
+
+*Note:* for high g and high a, the half doubling is equivalent to the normal doubling. Thus `\hdblg` is equivalent to `\dblg` as is `\hdblA` equivalent to `\dblA`.
+
+### Slurs
+
+Use `\slur` with the proper note.
+
+Example: Slur on b: `\slurb`
+
+*Note:* Slurs on low g, high g, and high a can not be played and will therefore not be supported.
+
+### Half slurs
+
+Use `\hslur` with the proper note.
+
+Example: Half slur on b: `\hslurb`
+
+*Note:* Half slurs on low g and high a can not be played and will therefore not be supported.
+
+### Thumb slurs
+
+Use `\tslur` with the proper note.
+
+Example: Thumb slur on b: `\tslurb`
+
+*Note:* Half slurs on low g and high a can not be played and will therefore not be supported.
+
+### Catches (G grace note grips)
+
+Use `\catch` with the proper note. These are supported for low a, b, c, d (with b grace note), and e.
+
+Example: Catch on c: `\catchc`
+
