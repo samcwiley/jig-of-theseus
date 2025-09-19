@@ -126,7 +126,6 @@ impl MusicWriter for BMWWriter {
 
     /// Writes out a full measure of notes; handles beaming logic
     fn write_measure(&mut self, measure: &Measure) -> std::io::Result<()> {
-        write!(self.writer, "!\t")?;
         let beats = measure.get_beats();
         let note_beams_vec = beats.iter().map(get_beams);
         for (beat, note_beams) in beats.iter().zip(note_beams_vec) {
@@ -135,22 +134,34 @@ impl MusicWriter for BMWWriter {
                 write!(self.writer, "\t")?;
             }
         }
-        writeln!(self.writer)?;
         Ok(())
     }
 
     /// Writes a series of measures; handles barline logic
     fn write_part(&mut self, part: &Part) -> std::io::Result<()> {
-        writeln!(self.writer, "New part")?;
-        for measure in &part.bars {
+        for (num, measure) in part.bars.iter().enumerate() {
+            if num == 0 {
+                writeln!(self.writer)?;
+                write!(self.writer, "&  sharpf sharpc 6_8 I!''\t")?;
+            } else if num == 4 {
+                writeln!(self.writer)?;
+                write!(self.writer, "&  sharpf sharpc\t")?;
+            } else {
+                write!(self.writer, "!\t")?;
+            }
             self.write_measure(measure)?;
+            if num == 3 {
+                write!(self.writer, "!t")?;
+            } else if num == 7 {
+                write!(self.writer, "''!I")?;
+            }
+            writeln!(self.writer)?;
         }
         Ok(())
     }
 
     /// Writes a series of parts along with requisite metadata used in BMW files
     fn write_tune(&mut self, tune: &Tune) -> std::io::Result<()> {
-        writeln!(self.writer, "Atholl highlanders")?;
         for part in &tune.parts {
             self.write_part(part)?;
         }
@@ -159,9 +170,7 @@ impl MusicWriter for BMWWriter {
 }
 
 pub fn write_bmw_file(writer: &mut BMWWriter, tune: &Tune) -> std::io::Result<()> {
-    let pre_tune_junk = r#"
-```bww
-Bagpipe Reader:1.0
+    let pre_tune_junk = r#"Bagpipe Reader:1.0
 
 MIDINoteMappings,(54,56,58,59,61,63,64,66,68,56,58,60,61,63,65,66,68,70,55,57,59,60,62,64,65,67,69)
 
@@ -184,8 +193,6 @@ TuneFormat,(1,1,F,L,500,500,500,500,L,0,0)
 "Trad.",(M,R,0,0,Times New Roman,14,400,0,0,18,0,0,0)
 
 "",(F,R,0,0,Times New Roman,10,400,0,0,18,0,0,0)
-
-```
     "#;
     write!(writer.writer, "{pre_tune_junk}")?;
     writer.write_tune(tune)?;

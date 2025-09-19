@@ -13,7 +13,7 @@ use crate::{
 fn main() -> Result<(), std::io::Error> {
     let tune = process_lily()?;
     let lily_out = File::create("atholl_highlanders_out.ly")?;
-    let bmw_out = File::create("atholl_highlanders_out.bmw")?;
+    let bmw_out = File::create("atholl_highlanders_out.bww")?;
 
     let lily_buf_writer = BufWriter::new(lily_out);
     let bmw_buf_writer = BufWriter::new(bmw_out);
