@@ -102,7 +102,51 @@ Example: Thumb slur on b: `\tslurb`
 
 ### Catches (G grace note grips)
 
-Use `\catch` with the proper note. These are supported for low a, b, c, d (with b grace note), and e.
+A g grace note to a theme note, followed by a grip on that note. Use `\catch` with the proper note. These are supported for low a, b, c, d (with b grace note), and e.
 
-Example: Catch on c: `\catchc`
+Example: Catch on b: `\catchb`
 
+### Half Catches 
+
+A theme note, followed by a grip on that note. Use `\hcatch` with the proper note. These are supported for low a, b, c, d (with b grace note) and e.
+
+Example: Half catch on c: `\hcatchc`
+
+### Thumb catches
+
+Like a catch, but coming from high g, so it will have a high A (thumb) grace note instead of a g grace note. Supported for low a, b, c, d (with b grace note) and e. 
+
+Example: Thumb catch on low a: `\tcatcha`
+
+### Other Embellishments
+
+| Embellishment | Lilypond |
+| ------------- | --- |
+| D throw       | `\thrwd` |
+| D throw from low G | `\Gthrwd` |
+| Heavy d throw | `\gripthrwd` |
+| Edre (e throw) | `\thrwe` or `\dre` |
+| Dare (f throw) | `\thrwf` or `\dare` |
+| Birl on a  | `\wbirl` |
+| Birl w/ low a grace note | `\birl` |
+| Birl w/ g grace note | `\gbirl` | 
+| Birl w/ d grace note | `\dbirl` |
+| Grip | `\grip` |
+| Grip w/ b grace note | `\bgrip` |
+| Grip w/ e grace note (hadeda) | `\egrip` |
+| Taorluath | `\taor` |
+| "Taorjmd"? Like a taorluath but the third grade note is a low a instead of low g | `\taorjmd` |
+| Redundant low a taorluath | `\taorold` |
+| Taorluath w/ b grace note | `\btaor` |
+| Taorluath from low g | `\Gtaor` |
+| Taorluaths a mach | `\taoramb`, `\taoramc`, `\taoramd` |
+
+#### Crunluaths
+
+- Crunluath - `\crun`
+- Crunluath w/ b grace note (from D) - `\dcrun`
+- Crunluath from low g - `\Gcrun`
+- Crunluaths a mach - `\crunamb`, `\crunamc`, `\crunamd`
+- The second half of an amach (semi-open edres) - `\crunambfosg`, `\crunamcfosg`, `\crunamdfosg`
+
+WHY ARE THERE SO  MANY EMBELLISHMENTS
