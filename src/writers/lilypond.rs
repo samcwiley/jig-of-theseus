@@ -4,7 +4,7 @@ use std::{
 };
 
 use crate::{
-    ir::{Duration, Embellishment, Measure, Note, Part, Pitch, Tune},
+    ir::{Duration, Embellishment, Measure, Note, Part, Pitch, TimeSignature, Tune},
     writers::MusicWriter,
 };
 
@@ -38,7 +38,7 @@ impl MusicWriter for LilyWriter {
         Ok(())
     }
 
-    fn write_measure(&mut self, measure: &Measure) -> std::io::Result<()> {
+    fn write_measure(&mut self, measure: &Measure, _measure_number: usize) -> std::io::Result<()> {
         write!(self.writer, "\t\t")?;
         for note in &measure.notes {
             self.write_note(note)?;
@@ -47,10 +47,15 @@ impl MusicWriter for LilyWriter {
         Ok(())
     }
 
-    fn write_part(&mut self, part: &Part) -> std::io::Result<()> {
+    fn write_part(
+        &mut self,
+        part: &Part,
+        _part_number: usize,
+        _time_signature: TimeSignature,
+    ) -> std::io::Result<()> {
         writeln!(self.writer, "\t\\repeat volta 2 {{")?;
-        for measure in &part.bars {
-            self.write_measure(measure)?;
+        for (measure_number, measure) in part.bars.iter().enumerate() {
+            self.write_measure(measure, measure_number)?;
         }
         writeln!(self.writer, "\t}}")?;
         Ok(())
@@ -60,8 +65,8 @@ impl MusicWriter for LilyWriter {
         let internal_name = tune.name.to_ascii_lowercase().replace(' ', "_");
         writeln!(self.writer, "{internal_name} = {{")?;
         writeln!(self.writer, "\t\\time 6/8")?;
-        for part in &tune.parts {
-            self.write_part(part)?;
+        for (part_number, part) in tune.parts.iter().enumerate() {
+            self.write_part(part, part_number, tune.time_signature)?;
         }
         writeln!(self.writer, "}}")?;
         Ok(())

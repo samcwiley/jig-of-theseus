@@ -1,4 +1,6 @@
-use crate::ir::{Duration, Embellishment, Measure, Note, Part, Pitch, TimeSignature, Tune};
+use crate::ir::{
+    Duration, Embellishment, Measure, Note, Part, Pitch, TimeSignature, Tune, TuneType,
+};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
@@ -72,6 +74,7 @@ pub fn process_lily() -> Result<Tune, std::io::Error> {
         name: String::from("Atholl Highlanders"),
         parts,
         time_signature: TimeSignature::SixEight,
+        tune_type: TuneType::Jig,
     };
     Ok(tune)
 }

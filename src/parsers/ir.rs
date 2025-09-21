@@ -256,10 +256,25 @@ impl fmt::Display for Part {
     }
 }
 
+pub enum TuneType {
+    March,
+    Jig,
+}
+impl fmt::Display for TuneType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let tune_type = match self {
+            TuneType::March => "March",
+            TuneType::Jig => "Jig",
+        };
+        write!(f, "{tune_type}")
+    }
+}
+
 pub struct Tune {
     pub name: String,
     pub parts: Vec<Part>,
     pub time_signature: TimeSignature,
+    pub tune_type: TuneType,
 }
 
 impl fmt::Display for Tune {
@@ -273,23 +288,23 @@ impl fmt::Display for Tune {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum TimeSignature {
     SixEight,
 }
 
 impl TimeSignature {
-    fn eights_per_beat(&self) -> usize {
+    fn eights_per_beat(self) -> usize {
         match self {
             TimeSignature::SixEight => 3,
         }
     }
-    fn beats_per_bar(&self) -> usize {
+    fn beats_per_bar(self) -> usize {
         match self {
             TimeSignature::SixEight => 2,
         }
     }
-    fn eights_per_bar(&self) -> usize {
+    fn eights_per_bar(self) -> usize {
         self.eights_per_beat() * self.beats_per_bar()
     }
 }
