@@ -12,7 +12,7 @@ For a hobby as niche as bagpipe, there is a shockingly large amount of sheet mus
 
 ## Formats supported
 
-Currently, `pibroxide` supports [lilypond](https://lilypond.org/) file format with both parsers and readers. This means it can both read in lilypond files, as well as export them. As the project grows, the main focus will be to support additional file types with readers and writers. 
+Currently, `pibroxide` supports [lilypond](https://lilypond.org/) and [BMW](https://robertmacneilmusicworks.com/about/) file format with both parsers and readers. This means it can both read in lilypond files, as well as export them. As the project grows, the main focus will be to support additional file types with readers and writers. 
 
 The planned file types for added support include, in order of preference:
 
