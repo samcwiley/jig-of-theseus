@@ -84,7 +84,7 @@ Example: Slur on b: `\slurb`
 
 *Note:* Slurs on low g, high g, and high a can not be played and will therefore not be supported.
 
-### Half slurs
+### Half slurs (not currently supported)
 
 Use `\hslur` with the proper note.
 
@@ -92,7 +92,7 @@ Example: Half slur on b: `\hslurb`
 
 *Note:* Half slurs on low g and high a can not be played and will therefore not be supported.
 
-### Thumb slurs
+### Thumb slurs (not currently supported)
 
 Use `\tslur` with the proper note.
 
@@ -100,53 +100,107 @@ Example: Thumb slur on b: `\tslurb`
 
 *Note:* Half slurs on low g and high a can not be played and will therefore not be supported.
 
-### Catches (G grace note grips)
+### Catches (G grace note grips) (not currently supported)
 
 A g grace note to a theme note, followed by a grip on that note. Use `\catch` with the proper note. These are supported for low a, b, c, d (with b grace note), and e.
 
 Example: Catch on b: `\catchb`
 
-### Half Catches 
+### Half Catches (not currently supported)
 
 A theme note, followed by a grip on that note. Use `\hcatch` with the proper note. These are supported for low a, b, c, d (with b grace note) and e.
 
 Example: Half catch on c: `\hcatchc`
 
-### Thumb catches
+### Thumb catches (not currently supported)
 
 Like a catch, but coming from high g, so it will have a high A (thumb) grace note instead of a g grace note. Supported for low a, b, c, d (with b grace note) and e. 
 
 Example: Thumb catch on low a: `\tcatcha`
 
-### Other Embellishments
+### Throws
 
-| Embellishment | Lilypond |
-| ------------- | --- |
-| D throw       | `\thrwd` |
-| D throw from low G | `\Gthrwd` |
-| Heavy d throw | `\gripthrwd` |
-| Edre (e throw) | `\thrwe` or `\dre` |
-| Dare (f throw) | `\thrwf` or `\dare` |
-| Birl on a  | `\wbirl` |
-| Birl w/ low a grace note | `\birl` |
-| Birl w/ g grace note | `\gbirl` | 
-| Birl w/ d grace note | `\dbirl` |
-| Grip | `\grip` |
-| Grip w/ b grace note | `\bgrip` |
-| Grip w/ e grace note (hadeda) | `\egrip` |
-| Taorluath | `\taor` |
-| "Taorjmd"? Like a taorluath but the third grade note is a low a instead of low g | `\taorjmd` |
-| Redundant low a taorluath | `\taorold` |
-| Taorluath w/ b grace note | `\btaor` |
-| Taorluath from low g | `\Gtaor` |
-| Taorluaths a mach | `\taoramb`, `\taoramc`, `\taoramd` |
+| Embellishment | Lilypond | Currently Supported |
+| ------------- | -------- | ------------------- |
+| D throw       | `\thrwd` | ✓ |
+| D throw from low G | `\Gthrwd` | X |
+| Heavy d throw | `\gripthrwd` | X |
+| Edre (e throw) | `\thrwe` or `\dre` | ✓ |
+| Dare (f throw) | `\thrwf` or `\dare` | ✓ | 
+| Bari (high g throw from low g) | `\bari` | ✓ |
+| Chedari (high g through from e) | `\dari` | ✓ |
+| D throw with long low g | `\pthrwd` | X |
+| Darodo (Bubbly) | `\darodo` | ✓ |
+| Darodo from low g | `\Gdarodo` | X |
+| Darodo from low g w/ long final low G | `\pGdarodo` | X |
 
-#### Crunluaths
+### Birls
 
-- Crunluath - `\crun`
-- Crunluath w/ b grace note (from D) - `\dcrun`
-- Crunluath from low g - `\Gcrun`
-- Crunluaths a mach - `\crunamb`, `\crunamc`, `\crunamd`
-- The second half of an amach (semi-open edres) - `\crunambfosg`, `\crunamcfosg`, `\crunamdfosg`
+| Embellishment | Lilypond | Currently Supported |
+| ------------- | -------- | ------------------- |
+| Birl on a  | `\wbirl` | ✓ |
+| Birl w/ low a grace note | `\birl` | ✓ |
+| Birl w/ g grace note | `\gbirl` | ✓ |
+| Birl w/ d grace note | `\dbirl` | X |
 
-WHY ARE THERE SO  MANY EMBELLISHMENTS
+### Grips
+
+| Embellishment | Lilypond | Currently Supported |
+| ------------- | -------- | ------------------- |
+| Grip | `\grip` | ✓ | 
+| Grip w/ b grace note | `\bgrip` | ✓ |
+| Grip w/ e grace note (hadeda) | `\egrip` | X |
+
+### Taorluaths
+
+| Embellishment | Lilypond | Currently Supported |
+| ------------- | -------- | ------------------- |
+| Taorluath | `\taor` | ✓ |
+| "Taorjmd"? Like a taorluath but the third grade note is a low a instead of low g | `\taorjmd` | X |
+| Redundant low a taorluath | `\taorold` | X |
+| Taorluath w/ b grace note | `\btaor` | ✓ |
+| Taorluath from low g | `\Gtaor` | X |
+| Taorluaths a mach | `\taoramb`, `\taoramc`, `\taoramd` | X |
+
+### Crunluaths
+
+| Embellishment | Lilypond | Currently Supported |
+| ------------- | -------- | ------------------- |
+| Crunluath | `\crun` | ✓ |
+| Crunluath w/ b grace note | `\dcrun` | ✓ |
+| Crunluath from low g | `\Gcrun` | ✓ |
+| Crunluaths a mach | `\crunamb`, `\crunamc`, `\crunamd` | X |
+| The second half of an amach (open edres) | `\crunambfosg`, `\crunamcfosg`, `\crunamdfosg` | X |
+
+### "Weird stuff from Joseph MacDonald's Book
+
+These are very long bagpipe embellishments, adapted from harp glissandos, and are not commonly used. I do not intend to support these at this time, but am including them in the documentation for completeness since they are included in `bagpipe.ly`.
+
+| Embellishment | Lilypond | Currently Supported |
+| ------------- | -------- | ------------------- |
+| Fifteenth Cutting | `\fifteenthcutting` | X |
+| Heavy Fifteenth Cutting | `\fifteenthcuttingG` | X |
+| Fifteenth Cutting from low G | `\Gfifteenthcutting`| X |
+| Heavy Fifteenth Cutting from low G | `\GfifteenthcuttingG` | X |
+| Seventeenth Cutting | `\seventeenthcutting` | X |
+| Heavy Seventeenth Cutting | `\seventeenthcuttingG` | X |
+| Seventeenth Cutting from low G | `\Gseventeenthcutting` | X |
+| Heavy Seventeenth Cutting from low G | `\GseventeenthcuttingG` | X |
+| Barluadh (Barludh, Barluath) | `\barluadh` | X |
+| Heavy Barluadh | `\barluadhG` | X |
+| Barluadh from low G | `\Gbarluadh` | X |
+| Heavy barluadh from low G | X |
+
+### Other piobaireachd markup
+
+I do not intend to support these at this time, but am including them in the documentation for completeness since they are included in `bagpipe.ly`.
+
+| Embellishment | Lilypond | Currently Supported |
+| ------------- | -------- | ------------------- |
+| Trebling (three lines under note to denote GDE variation) | `\trebling` | X |
+| Taorluath "T" under note | `\txtaor` | X |
+| Crunluath "C" under note | `\txcrun` | X |
+| Taorluath and Crunluath "T" and "C" under note | `\txtaorcrun` | X |
+| Taorluath a Mach, upside down "T" under note | `\txtaoram` | X |
+| Crunluath a Mach, backwards "C" under note | `\txcrunam` | X |
+| Taorluath and Crunluath a Mach under note | `\txtaorcrunam` | X |
