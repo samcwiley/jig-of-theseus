@@ -5,7 +5,7 @@ use std::{
 };
 
 use crate::{
-    ir::{Beat, Duration, Embellishment, Measure, Note, Part, Pitch, Tune},
+    ir::{Beat, Duration, Embellishment, Measure, Note, Part, Pitch, TimeSignature, Tune},
     writers::MusicWriter,
 };
 
@@ -45,6 +45,22 @@ impl fmt::Display for BeamSide {
     }
 }
 
+struct BMWTimeSignature {
+    pub time_signature: Option<TimeSignature>,
+}
+
+impl fmt::Display for BMWTimeSignature {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let out = match &self.time_signature {
+            Some(time_signature) => match time_signature {
+                TimeSignature::SixEight => "6_8",
+            },
+            None => "",
+        };
+        write!(f, "{out}")
+    }
+}
+
 impl BMWWriter {
     /// Handles writing a note with beaming or calls off to a standard, non-beamed note writer
     fn write_bmw_note(&mut self, note: &Note, beam_side: Option<BeamSide>) -> std::io::Result<()> {
@@ -70,6 +86,13 @@ impl BMWWriter {
         } else {
             self.write_note(note)
         }
+    }
+
+    fn write_key_time_signature(
+        &mut self,
+        time_signature: &BMWTimeSignature,
+    ) -> std::io::Result<()> {
+        write!(self.writer, "&  sharpf sharpc {time_signature}\t")
     }
 }
 
@@ -125,7 +148,7 @@ impl MusicWriter for BMWWriter {
     }
 
     /// Writes out a full measure of notes; handles beaming logic
-    fn write_measure(&mut self, measure: &Measure) -> std::io::Result<()> {
+    fn write_measure(&mut self, measure: &Measure, _measure_number: usize) -> std::io::Result<()> {
         let beats = measure.get_beats();
         let note_beams_vec = beats.iter().map(get_beams);
         for (beat, note_beams) in beats.iter().zip(note_beams_vec) {
@@ -138,22 +161,49 @@ impl MusicWriter for BMWWriter {
     }
 
     /// Writes a series of measures; handles barline logic
-    fn write_part(&mut self, part: &Part) -> std::io::Result<()> {
-        for (num, measure) in part.bars.iter().enumerate() {
-            if num == 0 {
-                writeln!(self.writer)?;
-                write!(self.writer, "&  sharpf sharpc 6_8 I!''\t")?;
-            } else if num == 4 {
-                writeln!(self.writer)?;
-                write!(self.writer, "&  sharpf sharpc\t")?;
-            } else {
-                write!(self.writer, "!\t")?;
-            }
-            self.write_measure(measure)?;
-            if num == 3 {
-                write!(self.writer, "!t")?;
-            } else if num == 7 {
-                write!(self.writer, "''!I")?;
+    fn write_part(
+        &mut self,
+        part: &Part,
+        part_number: usize,
+        time_signature: TimeSignature,
+    ) -> std::io::Result<()> {
+        for (measure_number, measure) in part.bars.iter().enumerate() {
+            match measure_number {
+                0 => {
+                    let time_signature = if part_number == 0 {
+                        Some(time_signature)
+                    } else {
+                        writeln!(self.writer)?;
+                        None
+                    };
+                    let time_signature = BMWTimeSignature { time_signature };
+                    self.write_key_time_signature(&time_signature)?;
+                    write!(self.writer, "I!''\t")?;
+                    self.write_measure(measure, measure_number)?;
+                }
+                4 => {
+                    writeln!(self.writer)?;
+                    self.write_key_time_signature(&BMWTimeSignature {
+                        time_signature: None,
+                    })?;
+                    writeln!(self.writer)?;
+                    write!(self.writer, "!\t")?;
+                    self.write_measure(measure, measure_number)?;
+                }
+                3 => {
+                    write!(self.writer, "!\t")?;
+                    self.write_measure(measure, measure_number)?;
+                    write!(self.writer, "!t")?;
+                }
+                7 => {
+                    write!(self.writer, "!\t")?;
+                    self.write_measure(measure, measure_number)?;
+                    write!(self.writer, "''!I")?;
+                }
+                _ => {
+                    write!(self.writer, "!\t")?;
+                    self.write_measure(measure, measure_number)?;
+                }
             }
             writeln!(self.writer)?;
         }
@@ -162,15 +212,15 @@ impl MusicWriter for BMWWriter {
 
     /// Writes a series of parts along with requisite metadata used in BMW files
     fn write_tune(&mut self, tune: &Tune) -> std::io::Result<()> {
-        for part in &tune.parts {
-            self.write_part(part)?;
+        for (part_number, part) in tune.parts.iter().enumerate() {
+            self.write_part(part, part_number, tune.time_signature)?;
         }
         Ok(())
     }
 }
 
 pub fn write_bmw_file(writer: &mut BMWWriter, tune: &Tune) -> std::io::Result<()> {
-    let pre_tune_junk = r#"Bagpipe Reader:1.0
+    let pre_tune_junk = r"Bagpipe Reader:1.0
 
 MIDINoteMappings,(54,56,58,59,61,63,64,66,68,56,58,60,61,63,65,66,68,70,55,57,59,60,62,64,65,67,69)
 
@@ -181,20 +231,17 @@ InstrumentMappings,(71,71,45,33,1000,60,70)
 GracenoteDurations,(20,40,30,50,100,200,800,1200,250,250,250,500,200)
 
 FontSizes,(100,100,65,70,300)
+";
+    let tempo = 110usize;
+    let author = "Trad.";
+    let tune_type = &tune.tune_type;
+    let tune_name = &tune.name;
 
-TuneTempo,110
-
-TuneFormat,(1,1,F,L,500,500,500,500,L,0,0)
-
-"Atholl Highlanders",(T,L,0,0,Times New Roman,16,700,0,0,18,0,0,0)
-
-"Jig",(Y,C,0,0,Times New Roman,14,400,0,0,18,0,0,0)
-
-"Trad.",(M,R,0,0,Times New Roman,14,400,0,0,18,0,0,0)
-
-"",(F,R,0,0,Times New Roman,10,400,0,0,18,0,0,0)
-    "#;
-    write!(writer.writer, "{pre_tune_junk}")?;
+    let meta = format!(
+        "TuneTempo,{tempo}\n\nTuneFormat,(1,1,F,L,500,500,500,500,L,0,0)\n\n\"{tune_name}\",(T,L,0,0,Times New Roman,16,700,0,0,18,0,0,0)\n\n\"{tune_type}\",(Y,C,0,0,Times New Roman,14,400,0,0,18,0,0,0)\n\n\"{author}\",(M,R,0,0,Times New Roman,14,400,0,0,18,0,0,0)\n\n\"\",(F,R,0,0,Times New Roman,10,400,0,0,18,0,0,0)\n\n"
+    );
+    writeln!(writer.writer, "{pre_tune_junk}")?;
+    writeln!(writer.writer, "{meta}")?;
     writer.write_tune(tune)?;
     Ok(())
 }
