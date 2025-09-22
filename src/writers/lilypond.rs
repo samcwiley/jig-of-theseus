@@ -1,10 +1,11 @@
 use std::{
+    collections::btree_map::Range,
     fs::File,
     io::{BufWriter, Write},
 };
 
 use crate::{
-    ir::{Duration, Embellishment, Measure, Note, Part, Pitch, TimeSignature, Tune},
+    ir::{Beat, Duration, Embellishment, Measure, Note, Part, Pitch, TimeSignature, Tune},
     writers::MusicWriter,
 };
 
@@ -142,6 +143,30 @@ voltaTwo = \markup  { \hspace #20 \italic \fontsize #+5 { "2" }  }
     "#;
     write!(writer.writer, "{post_tune_junk}")?;
     Ok(())
+}
+
+fn get_beams(beat: &Beat) -> Vec<(usize, usize)> {
+    let num_notes = beat.notes.len();
+    let mut left_end = None;
+    let mut beams = Vec::new();
+    let mut i = 0;
+
+    while i < num_notes {
+        // check if we don't have the start of a beam yet, then add one
+        if left_end.is_none() && beat.notes[i].duration.is_beamed() {
+            left_end = Some(i);
+        } else if let Some(left) = left_end
+            && (!beat.notes[i].duration.is_beamed() || i == num_notes)
+        {
+            let right_end = i;
+            beams.push((left, right_end));
+            left_end = None;
+        } else {
+            continue;
+        }
+        i += 1;
+    }
+    beams
 }
 
 fn get_lily_pitch(pitch: &Pitch) -> &'static str {
