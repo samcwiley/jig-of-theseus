@@ -108,6 +108,8 @@ impl MusicWriter for LilyWriter {
 }
 
 pub fn write_lily_file(writer: &mut LilyWriter, tune: &Tune) -> std::io::Result<()> {
+    let internal_name = tune.name.clone().to_ascii_lowercase().replace(' ', "_");
+    let composer = "Trad.";
     let pre_tune_junk = r#"\version "2.25.21"
 
 \include "bagpipe.ly" 
@@ -115,48 +117,53 @@ pub fn write_lily_file(writer: &mut LilyWriter, tune: &Tune) -> std::io::Result<
 \include "./music/includes/scw_bagpipe.ly"
 \include "./music/includes/score_settings.ly"
 
-source = "trad, simplified"
+source = "COMPOSER"
 
 #(allow-volta-hook "|")
 
 
 voltaTwo = \markup  { \hspace #20 \italic \fontsize #+5 { "2" }  }
     
-    "#;
+"#
+    .replace("COMPOSER", composer);
     write!(writer.writer, "{pre_tune_junk}")?;
     writer.write_tune(tune)?;
+    let meta = r#"
 
-    let post_tune_junk = r#"
 \header { 
   title = \markup  \override #'(line-width . 82) 
   { 
     \column {  
       \center-align {
         \line { 
-          Atholl Highlanders
+          TUNENAME
         }
       }
     }
   }
                   
   subtitle = ""
-  composer = "trad, simplified"
+  composer = "COMPOSER"
   arranger = ""
   meter = "" 
-}
+}    
+"#
+    .replace("TUNENAME", &tune.name)
+    .replace("COMPOSER", composer);
+    write!(writer.writer, "{meta}")?;
+
+    let post_tune_junk = r#"
 
 \paper {
 	#(set-paper-size "letter" 'portrait)
 }
-
-
 
 \score {
 	\new GrandStaff <<
 		\new Staff = "GHB" <<
 			\new Voice {
 			        \global
-				\atholl_highlanders
+				\tune_name
 			}
 		>>		
 	>>
@@ -170,7 +177,7 @@ voltaTwo = \markup  { \hspace #20 \italic \fontsize #+5 { "2" }  }
                 \header{
         }
 }
-    "#;
+"#.replace("tune_name", &internal_name);
     write!(writer.writer, "{post_tune_junk}")?;
     Ok(())
 }

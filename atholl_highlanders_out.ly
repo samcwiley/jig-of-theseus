@@ -5,14 +5,14 @@
 \include "./music/includes/scw_bagpipe.ly"
 \include "./music/includes/score_settings.ly"
 
-source = "trad, simplified"
+source = "Trad."
 
 #(allow-volta-hook "|")
 
 
 voltaTwo = \markup  { \hspace #20 \italic \fontsize #+5 { "2" }  }
     
-    atholl_highlanders = {
+atholl_highlanders = {
 	\time 6/8
 	\repeat volta 2 {
 		\grg e4. \grg e8 [ c8 \grd a8 ] |
@@ -64,6 +64,7 @@ voltaTwo = \markup  { \hspace #20 \italic \fontsize #+5 { "2" }  }
 	}
 }
 
+
 \header { 
   title = \markup  \override #'(line-width . 82) 
   { 
@@ -77,19 +78,15 @@ voltaTwo = \markup  { \hspace #20 \italic \fontsize #+5 { "2" }  }
   }
                   
   subtitle = ""
-  composer = "trad, simplified"
+  composer = "Trad."
   arranger = ""
   meter = "" 
 }    
 
 
-
-
 \paper {
 	#(set-paper-size "letter" 'portrait)
 }
-
-
 
 \score {
 	\new GrandStaff <<
@@ -110,4 +107,3 @@ voltaTwo = \markup  { \hspace #20 \italic \fontsize #+5 { "2" }  }
                 \header{
         }
 }
-    
