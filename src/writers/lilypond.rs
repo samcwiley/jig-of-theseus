@@ -1,5 +1,4 @@
 use std::{
-    collections::btree_map::Range,
     fs::File,
     io::{BufWriter, Write},
 };
@@ -40,10 +39,41 @@ impl MusicWriter for LilyWriter {
     }
 
     fn write_measure(&mut self, measure: &Measure, _measure_number: usize) -> std::io::Result<()> {
+        let beats: Vec<Beat> = measure.get_beats();
+        let note_beams_vec = beats
+            .iter()
+            .map(get_beams)
+            .collect::<Vec<Vec<(usize, usize)>>>();
         write!(self.writer, "\t\t")?;
-        for note in &measure.notes {
-            self.write_note(note)?;
+        for (beat, beams) in beats.iter().zip(note_beams_vec.iter()) {
+            // if no beams, just write the notes normally
+            if beams.is_empty() {
+                for note in &beat.notes {
+                    self.write_note(note)?;
+                }
+            } else {
+                let mut beam_iter = beams.iter();
+                let mut current = beam_iter.next();
+
+                for (j, note) in beat.notes.iter().enumerate() {
+                    if let Some(&(start, _)) = current
+                        && j == start
+                    {
+                        write!(self.writer, "[ ")?;
+                    }
+
+                    self.write_note(note)?;
+
+                    if let Some(&(_, end)) = current
+                        && j == end
+                    {
+                        write!(self.writer, "] ")?;
+                        current = beam_iter.next();
+                    }
+                }
+            }
         }
+
         writeln!(self.writer, "|")?;
         Ok(())
     }
@@ -57,6 +87,9 @@ impl MusicWriter for LilyWriter {
         writeln!(self.writer, "\t\\repeat volta 2 {{")?;
         for (measure_number, measure) in part.bars.iter().enumerate() {
             self.write_measure(measure, measure_number)?;
+            if measure_number == 3 || measure_number == 7 {
+                writeln!(self.writer, "\t\t\\break")?;
+            }
         }
         writeln!(self.writer, "\t}}")?;
         Ok(())
@@ -82,7 +115,6 @@ pub fn write_lily_file(writer: &mut LilyWriter, tune: &Tune) -> std::io::Result<
 \include "./music/includes/scw_bagpipe.ly"
 \include "./music/includes/score_settings.ly"
 
-filename = "atholl_highlanders.ly"
 source = "trad, simplified"
 
 #(allow-volta-hook "|")
@@ -95,25 +127,23 @@ voltaTwo = \markup  { \hspace #20 \italic \fontsize #+5 { "2" }  }
     writer.write_tune(tune)?;
 
     let post_tune_junk = r#"
-    \header { 
-          title = \markup  \override #'(line-width . 82) 
-          { 
-            \column {  
-              \center-align {
-                \line { Atholl Highlanders
-                }
-              }
-            }
-          }
+\header { 
+  title = \markup  \override #'(line-width . 82) 
+  { 
+    \column {  
+      \center-align {
+        \line { 
+          Atholl Highlanders
+        }
+      }
+    }
+  }
                   
-          subtitle = ""
-          composer = "trad, simplified"
-          arranger = ""
-          meter = "" 
-         }    
-
-
-
+  subtitle = ""
+  composer = "trad, simplified"
+  arranger = ""
+  meter = "" 
+}
 
 \paper {
 	#(set-paper-size "letter" 'portrait)
@@ -147,25 +177,28 @@ voltaTwo = \markup  { \hspace #20 \italic \fontsize #+5 { "2" }  }
 
 fn get_beams(beat: &Beat) -> Vec<(usize, usize)> {
     let num_notes = beat.notes.len();
-    let mut left_end = None;
     let mut beams = Vec::new();
-    let mut i = 0;
+    let mut left_end: Option<usize> = None;
 
+    let mut i = 0;
     while i < num_notes {
-        // check if we don't have the start of a beam yet, then add one
-        if left_end.is_none() && beat.notes[i].duration.is_beamed() {
+        let is_beamed = beat.notes[i].duration.is_beamed();
+
+        if left_end.is_none() && is_beamed {
             left_end = Some(i);
         } else if let Some(left) = left_end
-            && (!beat.notes[i].duration.is_beamed() || i == num_notes)
+            && !is_beamed
         {
-            let right_end = i;
-            beams.push((left, right_end));
+            beams.push((left + 1, i - 1));
             left_end = None;
-        } else {
-            continue;
         }
+
         i += 1;
     }
+    if let Some(left) = left_end {
+        beams.push((left + 1, num_notes - 1));
+    }
+
     beams
 }
 

@@ -150,8 +150,8 @@ impl MusicWriter for BMWWriter {
     /// Writes out a full measure of notes; handles beaming logic
     fn write_measure(&mut self, measure: &Measure, _measure_number: usize) -> std::io::Result<()> {
         let beats = measure.get_beats();
-        let note_beams_vec = beats.iter().map(get_beams);
-        for (beat, note_beams) in beats.iter().zip(note_beams_vec) {
+        let note_beams_iter = beats.iter().map(get_beams);
+        for (beat, note_beams) in beats.iter().zip(note_beams_iter) {
             for (note, beam_side) in beat.notes.iter().zip(note_beams) {
                 self.write_bmw_note(note, beam_side)?;
                 write!(self.writer, "\t")?;
