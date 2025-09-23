@@ -75,6 +75,7 @@ pub fn process_lily() -> Result<Tune, std::io::Error> {
         parts,
         time_signature: TimeSignature::SixEight,
         tune_type: TuneType::Jig,
+        composer: String::from("Trad."),
     };
     Ok(tune)
 }

@@ -109,7 +109,6 @@ impl MusicWriter for LilyWriter {
 
 pub fn write_lily_file(writer: &mut LilyWriter, tune: &Tune) -> std::io::Result<()> {
     let internal_name = tune.name.clone().to_ascii_lowercase().replace(' ', "_");
-    let composer = "Trad.";
     let pre_tune_junk = r#"\version "2.25.21"
 
 \include "bagpipe.ly" 
@@ -125,7 +124,7 @@ source = "COMPOSER"
 voltaTwo = \markup  { \hspace #20 \italic \fontsize #+5 { "2" }  }
     
 "#
-    .replace("COMPOSER", composer);
+    .replace("COMPOSER", &tune.composer);
     write!(writer.writer, "{pre_tune_junk}")?;
     writer.write_tune(tune)?;
     let meta = r#"
@@ -149,7 +148,7 @@ voltaTwo = \markup  { \hspace #20 \italic \fontsize #+5 { "2" }  }
 }    
 "#
     .replace("TUNENAME", &tune.name)
-    .replace("COMPOSER", composer);
+    .replace("COMPOSER", &tune.composer);
     write!(writer.writer, "{meta}")?;
 
     let post_tune_junk = r#"

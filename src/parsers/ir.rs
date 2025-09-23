@@ -275,6 +275,7 @@ pub struct Tune {
     pub parts: Vec<Part>,
     pub time_signature: TimeSignature,
     pub tune_type: TuneType,
+    pub composer: String,
 }
 
 impl fmt::Display for Tune {
