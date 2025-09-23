@@ -233,9 +233,9 @@ GracenoteDurations,(20,40,30,50,100,200,800,1200,250,250,250,500,200)
 FontSizes,(100,100,65,70,300)
 ";
     let tempo = 110usize;
-    let author = "Trad.";
     let tune_type = &tune.tune_type;
     let tune_name = &tune.name;
+    let author = &tune.composer;
 
     let meta = format!(
         "TuneTempo,{tempo}\n\nTuneFormat,(1,1,F,L,500,500,500,500,L,0,0)\n\n\"{tune_name}\",(T,L,0,0,Times New Roman,16,700,0,0,18,0,0,0)\n\n\"{tune_type}\",(Y,C,0,0,Times New Roman,14,400,0,0,18,0,0,0)\n\n\"{author}\",(M,R,0,0,Times New Roman,14,400,0,0,18,0,0,0)\n\n\"\",(F,R,0,0,Times New Roman,10,400,0,0,18,0,0,0)\n\n"
