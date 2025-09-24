@@ -1,4 +1,4 @@
-use crate::ir::{
+use crate::ir::internal_representation::{
     Duration, Embellishment, Measure, Note, Part, Pitch, TimeSignature, Tune, TuneType,
 };
 use std::fs::File;
@@ -20,7 +20,7 @@ pub enum Group {
 ///
 /// This function will return an error if .
 pub fn process_lily() -> Result<Tune, std::io::Error> {
-    let f = File::open("music/atholl_highlanders.ly")?;
+    let f = File::open("music/inputs/atholl_highlanders.ly")?;
     let reader = BufReader::new(f);
 
     let mut lines = reader.lines();
