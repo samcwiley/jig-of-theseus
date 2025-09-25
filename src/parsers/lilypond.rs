@@ -106,7 +106,7 @@ fn process_lily_embellishment(embellishment: &str) -> Embellishment {
     if let Some(grace_note_pitch) = embellishment.strip_prefix("\\gr") {
         Embellishment::GraceNote(process_lily_pitch(grace_note_pitch.as_bytes()[0]))
     } else if let Some(doubling_pitch) = embellishment.strip_prefix("\\dbl") {
-        Embellishment::GraceNote(process_lily_pitch(doubling_pitch.as_bytes()[0]))
+        Embellishment::Doubling(process_lily_pitch(doubling_pitch.as_bytes()[0]))
     } else if let Some(half_doubling_pitch) = embellishment.strip_prefix("\\hdbl") {
         Embellishment::HalfDoubling(process_lily_pitch(half_doubling_pitch.as_bytes()[0]))
     } else if let Some(thumb_doubling_pitch) = embellishment.strip_prefix("\\tdbl") {
