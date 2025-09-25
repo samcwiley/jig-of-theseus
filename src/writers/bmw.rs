@@ -5,7 +5,9 @@ use std::{
 };
 
 use crate::{
-    ir::{Beat, Duration, Embellishment, Measure, Note, Part, Pitch, TimeSignature, Tune},
+    ir::internal_representation::{
+        Beat, Duration, Embellishment, Measure, Note, Part, Pitch, TimeSignature, Tune,
+    },
     writers::MusicWriter,
 };
 
@@ -96,6 +98,7 @@ impl BMWWriter {
     }
 }
 
+#[must_use]
 pub fn get_beams(beat: &Beat) -> Vec<Option<BeamSide>> {
     let num_notes = beat.notes.len();
     let mut beams = Vec::with_capacity(num_notes);
@@ -219,6 +222,11 @@ impl MusicWriter for BMWWriter {
     }
 }
 
+/// Function for writing full bmw file
+///
+/// # Errors
+///
+/// This function returns Rsults from `write_tune` and `write!`
 pub fn write_bmw_file(writer: &mut BMWWriter, tune: &Tune) -> std::io::Result<()> {
     let pre_tune_junk = r"Bagpipe Reader:1.0
 
@@ -355,12 +363,11 @@ fn get_bmw_duration(duration: &Duration, pitch: &Pitch) -> BMWDuration {
 fn get_bmw_embellishment(embellishment: &Embellishment) -> String {
     match embellishment {
         Embellishment::GraceNote(pitch) => match pitch {
-            Pitch::B => todo!(),
             Pitch::LowG | Pitch::LowA | Pitch::C | Pitch::F => {
                 format!("str{}", BMWLowercase::new(pitch))
             }
             Pitch::HighG => String::from("gg"),
-            Pitch::D | Pitch::E => format!("{}g", BMWLowercase::new(pitch)),
+            Pitch::D | Pitch::E | Pitch::B => format!("{}g", BMWLowercase::new(pitch)),
             Pitch::HighA => String::from("tg"),
         },
         Embellishment::Doubling(pitch) => format!("db{}", BMWLowercase::new(pitch)),

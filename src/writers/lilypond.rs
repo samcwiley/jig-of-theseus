@@ -4,7 +4,9 @@ use std::{
 };
 
 use crate::{
-    ir::{Beat, Duration, Embellishment, Measure, Note, Part, Pitch, TimeSignature, Tune},
+    ir::internal_representation::{
+        Beat, Duration, Embellishment, Measure, Note, Part, Pitch, TimeSignature, Tune,
+    },
     writers::MusicWriter,
 };
 
@@ -107,6 +109,11 @@ impl MusicWriter for LilyWriter {
     }
 }
 
+/// Function for writing a full lilypond file
+///
+/// # Errors
+///
+/// This function returns errors from `write_tune` and the `write!` macro
 pub fn write_lily_file(writer: &mut LilyWriter, tune: &Tune) -> std::io::Result<()> {
     let internal_name = tune.name.clone().to_ascii_lowercase().replace(' ', "_");
     let pre_tune_junk = r#"\version "2.25.21"
