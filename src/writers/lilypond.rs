@@ -45,7 +45,7 @@ impl MusicWriter for LilyWriter {
         let note_beams_vec = beats
             .iter()
             .map(get_beams)
-            .collect::<Vec<Vec<(usize, usize)>>>();
+            .collect::<Vec<Vec<Option<(usize, usize)>>>>();
         write!(self.writer, "\t\t")?;
         for (beat, beams) in beats.iter().zip(note_beams_vec.iter()) {
             // if no beams, just write the notes normally
@@ -58,16 +58,16 @@ impl MusicWriter for LilyWriter {
                 let mut current = beam_iter.next();
 
                 for (j, note) in beat.notes.iter().enumerate() {
-                    if let Some(&(start, _)) = current
-                        && j == start
+                    if let Some(Some((start, _))) = current
+                        && j == *start
                     {
                         write!(self.writer, "[ ")?;
                     }
 
                     self.write_note(note)?;
 
-                    if let Some(&(_, end)) = current
-                        && j == end
+                    if let Some(Some((_, end))) = current
+                        && j == *end
                     {
                         write!(self.writer, "] ")?;
                         current = beam_iter.next();
@@ -188,7 +188,8 @@ voltaTwo = \markup  { \hspace #20 \italic \fontsize #+5 { "2" }  }
     Ok(())
 }
 
-fn get_beams(beat: &Beat) -> Vec<(usize, usize)> {
+#[must_use]
+pub fn get_beams(beat: &Beat) -> Vec<Option<(usize, usize)>> {
     let num_notes = beat.notes.len();
     let mut beams = Vec::new();
     let mut left_end: Option<usize> = None;
@@ -198,18 +199,30 @@ fn get_beams(beat: &Beat) -> Vec<(usize, usize)> {
         let is_beamed = beat.notes[i].duration.is_beamed();
 
         if left_end.is_none() && is_beamed {
+            // if we don't have a left end yet, and we come across a beamed note, we
+            // make a left end
             left_end = Some(i);
         } else if let Some(left) = left_end
             && !is_beamed
         {
-            beams.push((left + 1, i - 1));
+            // if we do have a left end and we come across a beamed note, make a
+            // right end
+            if i > left + 1 {
+                beams.push(Some((left + 1, i)));
+            }
             left_end = None;
+        } else if beat.notes.len() > i + 1 && beat.notes[i + 1].duration.is_beamed() {
+            // if the next note exists and is beamed, do nothing
+        } else if let Some(left) = left_end {
+            // we have gotten to the end of the measure
+            if i > left + 1 {
+                beams.push(Some((left + 1, i)));
+            }
+        } else {
+            beams.push(None);
         }
 
         i += 1;
-    }
-    if let Some(left) = left_end {
-        beams.push((left + 1, num_notes - 1));
     }
 
     beams
@@ -283,12 +296,3 @@ fn get_lily_embellishment(embellishment: &Embellishment) -> String {
         Embellishment::Tie(_) => String::from("~"),
     }
 }
-
-// pub fn write_lily_note(note: &Note) -> String {}
-
-// have a trait called music writer
-// it has methods "write_note", "write_measure", etc.
-// implement those traits for lilypond, musescore, etc.
-//
-// have the lilypond writer struct hold the bufwriter itself
-// then you can use write!() to write things
