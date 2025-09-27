@@ -9,7 +9,7 @@ pub trait MusicWriter {
     /// # Errors
     ///
     /// This function returns Results from the internal `write!` macro
-    fn write_note(&mut self, note: &Note) -> std::io::Result<()>;
+    fn write_note(&mut self, note: Note) -> std::io::Result<()>;
 
     /// Function for writing a measure of notes to an output file
     ///

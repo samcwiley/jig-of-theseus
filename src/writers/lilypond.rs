@@ -12,7 +12,7 @@ pub struct LilyWriter<W> {
 }
 
 impl<W: Write> MusicWriter for LilyWriter<W> {
-    fn write_note(&mut self, note: &Note) -> std::io::Result<()> {
+    fn write_note(&mut self, note: Note) -> std::io::Result<()> {
         let Note {
             pitch,
             duration,
@@ -48,7 +48,7 @@ impl<W: Write> MusicWriter for LilyWriter<W> {
             // if no beams, just write the notes normally
             if beams.is_empty() {
                 for note in &beat.notes {
-                    self.write_note(note)?;
+                    self.write_note(*note)?;
                 }
             } else {
                 let mut beam_iter = beams.iter();
@@ -61,7 +61,7 @@ impl<W: Write> MusicWriter for LilyWriter<W> {
                         write!(self.writer, "[ ")?;
                     }
 
-                    self.write_note(note)?;
+                    self.write_note(*note)?;
 
                     if let Some(Some((_, end))) = current
                         && j == *end
@@ -225,7 +225,7 @@ pub fn get_beams(beat: &Beat) -> Vec<Option<(usize, usize)>> {
     beams
 }
 
-fn get_lily_pitch(pitch: &Pitch) -> &'static str {
+fn get_lily_pitch(pitch: Pitch) -> &'static str {
     match pitch {
         Pitch::LowG => "G",
         Pitch::LowA => "a",
@@ -239,7 +239,7 @@ fn get_lily_pitch(pitch: &Pitch) -> &'static str {
     }
 }
 
-fn get_lily_duration(duration: &Duration) -> &'static str {
+fn get_lily_duration(duration: Duration) -> &'static str {
     match duration {
         Duration::ThirtySecond => "32",
         Duration::Sixteenth => "16",
@@ -255,7 +255,7 @@ fn get_lily_duration(duration: &Duration) -> &'static str {
     }
 }
 
-fn get_lily_embellishment(embellishment: &Embellishment) -> String {
+fn get_lily_embellishment(embellishment: Embellishment) -> String {
     // todo: add half shakes, remove tdblA, light/heavy shakes, light/heavy
     // slurs, add half shakes, remove low g shakes and slurs, add half slurs,
     // add catches, add half catches, add thumb catches, add low g d throw, add
