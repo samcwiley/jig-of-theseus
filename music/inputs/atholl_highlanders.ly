@@ -42,13 +42,13 @@ atholl_highlanders = {
     \break
   }
   \repeat volta 2 {
-    A4 e8 \dble e8 [d8 c8] |
+    \dblA A4 e8 \dble e8 [d8 c8] |
     A8 [e8 \gra e8] \dble e8 [d8 c8] |
     A4 e8 \dble e8 [d8 c8] |
     \grg b8 [c8 d8] \dblc c8 [b8 \grG a8] |
     \break
-    A8 [e8 \gra e8] \dble e8 [d8 c8] |
-    A8 [e8 \gra e8] \dble e4 d8 |
+    A8 [e8 \gra e8] A8 [e8 \gra e8] |
+    \grg f4 \grip f8 \dble e4 d8 |
     \dblc c8 [A8 e8] \grg f8 [e8 d8] |
     \grg c8 [d8 \gre b8] \grG a4. |
   }
@@ -57,11 +57,11 @@ atholl_highlanders = {
     \dblc c8 [a8 \grd c8] \dblc c8 [a8 \grd c8] |
     \dbld d8 [b8 d8] \dbld d8 [b8 d8] |
     \dblc c8 [a8 \grd c8] \dblc c8 [a8 \grd c8] |
-    \dblb b8 [G8 \grd b8] \grg b8 [c8 d8] |
+    \darodo b4 G8 \grg b8 [c8 d8] |
     \break 
     \dblc c8 [a8 \grd c8] \dblc c8 [a8 \grd c8] |
     \dbld d8 [b8 d8] \grg f8 [e8 d8] |
-    \dblc c8 [A8 e8] \grg f8 [e8 d8] |
+    \dblc c8 [A8 e8] \dare f4 d8 |
     \grg c8 [d8 \gre b8] \grG a4. |
   }
 }

@@ -1,8 +1,4 @@
-use std::{
-    fmt,
-    fs::File,
-    io::{BufWriter, Write},
-};
+use std::{fmt, io::Write};
 
 use crate::{
     ir::internal_representation::{
@@ -12,8 +8,8 @@ use crate::{
 };
 
 /// Wraps `BufWriter` with functions for writing `.bww` files
-pub struct BMWWriter {
-    pub writer: BufWriter<File>,
+pub struct BMWWriter<W> {
+    pub writer: W,
 }
 
 /// Enum for handling beam directions for beamed 8th notes, 16ths, etc.
@@ -63,7 +59,7 @@ impl fmt::Display for BMWTimeSignature {
     }
 }
 
-impl BMWWriter {
+impl<W: Write> BMWWriter<W> {
     /// Handles writing a note with beaming or calls off to a standard, non-beamed note writer
     fn write_bmw_note(&mut self, note: &Note, beam_side: Option<BeamSide>) -> std::io::Result<()> {
         if let Some(beam_side) = beam_side {
@@ -127,7 +123,7 @@ pub fn get_beams(beat: &Beat) -> Vec<Option<BeamSide>> {
     beams
 }
 
-impl MusicWriter for BMWWriter {
+impl<W: Write> MusicWriter for BMWWriter<W> {
     /// Writes note without beaming
     fn write_note(&mut self, note: &Note) -> std::io::Result<()> {
         let Note {
@@ -227,7 +223,7 @@ impl MusicWriter for BMWWriter {
 /// # Errors
 ///
 /// This function returns Rsults from `write_tune` and `write!`
-pub fn write_bmw_file(writer: &mut BMWWriter, tune: &Tune) -> std::io::Result<()> {
+pub fn write_bmw_file<W: Write>(writer: &mut BMWWriter<W>, tune: &Tune) -> std::io::Result<()> {
     let pre_tune_junk = r"Bagpipe Reader:1.0
 
 MIDINoteMappings,(54,56,58,59,61,63,64,66,68,56,58,60,61,63,65,66,68,70,55,57,59,60,62,64,65,67,69)

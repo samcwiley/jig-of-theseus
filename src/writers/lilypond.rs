@@ -1,7 +1,4 @@
-use std::{
-    fs::File,
-    io::{BufWriter, Write},
-};
+use std::io::Write;
 
 use crate::{
     ir::internal_representation::{
@@ -10,11 +7,11 @@ use crate::{
     writers::MusicWriter,
 };
 
-pub struct LilyWriter {
-    pub writer: BufWriter<File>,
+pub struct LilyWriter<W> {
+    pub writer: W,
 }
 
-impl MusicWriter for LilyWriter {
+impl<W: Write> MusicWriter for LilyWriter<W> {
     fn write_note(&mut self, note: &Note) -> std::io::Result<()> {
         let Note {
             pitch,
@@ -114,14 +111,14 @@ impl MusicWriter for LilyWriter {
 /// # Errors
 ///
 /// This function returns errors from `write_tune` and the `write!` macro
-pub fn write_lily_file(writer: &mut LilyWriter, tune: &Tune) -> std::io::Result<()> {
+pub fn write_lily_file<W: Write>(writer: &mut LilyWriter<W>, tune: &Tune) -> std::io::Result<()> {
     let internal_name = tune.name.clone().to_ascii_lowercase().replace(' ', "_");
     let pre_tune_junk = r#"\version "2.25.21"
 
 \include "bagpipe.ly" 
 
-\include "./music/includes/scw_bagpipe.ly"
-\include "./music/includes/score_settings.ly"
+\include "../includes/scw_bagpipe.ly"
+\include "../includes/score_settings.ly"
 
 source = "COMPOSER"
 
