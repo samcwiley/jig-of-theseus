@@ -89,7 +89,7 @@ pub fn process_bar(line: &str) -> Measure {
     let mut embellishment = None;
     for token in line.split_ascii_whitespace() {
         if token.starts_with('\\') {
-            embellishment = Some(process_lily_embellishment(token));
+            embellishment = process_lily_embellishment(token);
         } else {
             let note = process_lily_note(token, embellishment);
             notes.push(note);
@@ -102,8 +102,10 @@ pub fn process_bar(line: &str) -> Measure {
     }
 }
 
-fn process_lily_embellishment(embellishment: &str) -> Embellishment {
-    if let Some(grace_note_pitch) = embellishment.strip_prefix("\\gr") {
+fn process_lily_embellishment(embellishment: &str) -> Option<Embellishment> {
+    let parsed_embellishment = if let Some(grace_note_pitch) = embellishment.strip_prefix("\\gr")
+        && grace_note_pitch.len() == 1
+    {
         Embellishment::GraceNote(process_lily_pitch(grace_note_pitch.as_bytes()[0]))
     } else if let Some(doubling_pitch) = embellishment.strip_prefix("\\dbl") {
         Embellishment::Doubling(process_lily_pitch(doubling_pitch.as_bytes()[0]))
@@ -136,9 +138,13 @@ fn process_lily_embellishment(embellishment: &str) -> Embellishment {
             "\\darodo" => Embellishment::Darodo,
             "\\catchc" => Embellishment::Hodro,
             "\\catchb" => Embellishment::Hiotro,
-            _ => panic!("Unrecognized embellishment {embellishment}"),
+            _ => {
+                eprintln!("Unrecognized embellishment {embellishment}");
+                return None;
+            }
         }
-    }
+    };
+    Some(parsed_embellishment)
 }
 
 fn process_lily_note(note: &str, embellishment: Option<Embellishment>) -> Note {
