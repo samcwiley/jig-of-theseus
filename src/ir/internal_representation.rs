@@ -4,7 +4,7 @@ use std::fmt;
 
 use crate::utils::math::f32_eq;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Note {
     pub pitch: Pitch,
     pub duration: Duration,
@@ -26,7 +26,7 @@ impl fmt::Display for Note {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Pitch {
     LowG,
     LowA,
@@ -79,7 +79,7 @@ impl fmt::Display for Pitch {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy)]
 pub enum Duration {
     ThirtySecond,
     Sixteenth,
@@ -148,7 +148,7 @@ impl fmt::Display for Duration {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum Embellishment {
     GraceNote(Pitch),
     Doubling(Pitch),
@@ -333,7 +333,7 @@ impl Beat {
         self.notes.iter().map(|n| n.duration.eighths()).sum::<f32>()
     }
     pub fn push(&mut self, note: &Note) {
-        self.notes.push(note.clone());
+        self.notes.push(*note);
     }
 }
 
@@ -379,11 +379,11 @@ impl Measure {
 
         for note in &self.notes {
             if note.duration.eighths() <= eighths_per_beat - current_beat.eighths() {
-                current_beat.notes.push(note.clone());
+                current_beat.notes.push(*note);
             } else {
                 beats.push(current_beat);
                 current_beat = Beat::new();
-                current_beat.notes.push(note.clone());
+                current_beat.notes.push(*note);
             }
             if f32_eq(current_beat.eighths(), eighths_per_beat) {
                 beats.push(current_beat);

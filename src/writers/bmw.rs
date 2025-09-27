@@ -61,7 +61,7 @@ impl fmt::Display for BMWTimeSignature {
 
 impl<W: Write> BMWWriter<W> {
     /// Handles writing a note with beaming or calls off to a standard, non-beamed note writer
-    fn write_bmw_note(&mut self, note: &Note, beam_side: Option<BeamSide>) -> std::io::Result<()> {
+    fn write_bmw_note(&mut self, note: Note, beam_side: Option<BeamSide>) -> std::io::Result<()> {
         if let Some(beam_side) = beam_side {
             let Note {
                 pitch,
@@ -125,7 +125,7 @@ pub fn get_beams(beat: &Beat) -> Vec<Option<BeamSide>> {
 
 impl<W: Write> MusicWriter for BMWWriter<W> {
     /// Writes note without beaming
-    fn write_note(&mut self, note: &Note) -> std::io::Result<()> {
+    fn write_note(&mut self, note: Note) -> std::io::Result<()> {
         let Note {
             pitch,
             duration,
@@ -152,9 +152,10 @@ impl<W: Write> MusicWriter for BMWWriter<W> {
         let note_beams_iter = beats.iter().map(get_beams);
         for (beat, note_beams) in beats.iter().zip(note_beams_iter) {
             for (note, beam_side) in beat.notes.iter().zip(note_beams) {
-                self.write_bmw_note(note, beam_side)?;
-                write!(self.writer, "\t")?;
+                self.write_bmw_note(*note, beam_side)?;
+                write!(self.writer, " ")?;
             }
+            write!(self.writer, "\t")?;
         }
         Ok(())
     }
@@ -251,7 +252,7 @@ FontSizes,(100,100,65,70,300)
 }
 
 /// For getting display pitches used in notes
-fn get_bmw_pitch(pitch: &Pitch) -> &'static str {
+fn get_bmw_pitch(pitch: Pitch) -> &'static str {
     match pitch {
         Pitch::LowG => "LG",
         Pitch::LowA => "LA",
@@ -271,10 +272,8 @@ struct BMWLowercase {
 }
 
 impl BMWLowercase {
-    fn new(pitch: &Pitch) -> Self {
-        Self {
-            pitch: pitch.clone(),
-        }
+    fn new(pitch: Pitch) -> Self {
+        Self { pitch }
     }
 }
 
@@ -303,17 +302,15 @@ struct Dot {
 
 impl Dot {
     /// Creates a dot on the given pitch
-    fn new(pitch: &Pitch) -> Self {
-        Self {
-            pitch: pitch.clone(),
-        }
+    fn new(pitch: Pitch) -> Self {
+        Self { pitch }
     }
 }
 
 impl fmt::Display for Dot {
     /// Prepends a `'` symbol to the lowercase
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "'{}", BMWLowercase::new(&self.pitch))
+        write!(f, "'{}", BMWLowercase::new(self.pitch))
     }
 }
 
@@ -337,7 +334,7 @@ impl fmt::Display for BMWDuration {
 
 /// Takes in duration and pitch and returns a [`BMWDuration`] object containing a
 /// stem value (2, 4, 8, etc) and an optional dot on the provided pitch
-fn get_bmw_duration(duration: &Duration, pitch: &Pitch) -> BMWDuration {
+fn get_bmw_duration(duration: Duration, pitch: Pitch) -> BMWDuration {
     let (stem_value, dot) = match duration {
         Duration::ThirtySecond => (32, None),
         Duration::Sixteenth => (16, None),
@@ -356,7 +353,7 @@ fn get_bmw_duration(duration: &Duration, pitch: &Pitch) -> BMWDuration {
 
 /// For writing out embellishments in BMW. The embellishments marked `todo!()` I
 /// could not find examples of in tunes
-fn get_bmw_embellishment(embellishment: &Embellishment) -> String {
+fn get_bmw_embellishment(embellishment: Embellishment) -> String {
     match embellishment {
         Embellishment::GraceNote(pitch) => match pitch {
             Pitch::LowG | Pitch::LowA | Pitch::C | Pitch::F => {

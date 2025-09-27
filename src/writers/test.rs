@@ -1,8 +1,16 @@
 #[cfg(test)]
-use crate::{
-    lilypond::process_bar,
-    writers::bmw::{self, BeamSide},
-    writers::lilypond::{self},
+use {
+    crate::{
+        lilypond::process_bar,
+        writers::bmw::{self, BeamSide},
+        writers::{
+            MusicWriter,
+            bmw::BMWWriter,
+            lilypond::LilyWriter,
+            lilypond::{self},
+        },
+    },
+    std::io::BufWriter,
 };
 
 /// Test BMW Beaming
@@ -52,4 +60,35 @@ fn test_lily_beams() {
     let beams2 = lilypond::get_beams(&beats[1]);
     assert_eq!(beams1, Vec::new());
     assert_eq!(beams2, Vec::new());
+}
+
+#[test]
+fn test_lily_out() {
+    // this is a pretty tautological test but it's checking that the writer works as expected
+    let bar = process_bar(r"\grg c8 [e8 \gra e8] \grg d8 [e8 \gra e8]");
+    let writer = BufWriter::new(Vec::new());
+    let mut lily_writer = LilyWriter { writer };
+    lily_writer
+        .write_measure(&bar, 0)
+        .expect("Couldn't write in test");
+    let vec_out = lily_writer.writer.into_inner().unwrap();
+    assert_eq!(
+        b"\t\t\\grg c8 [ e8 \\gra e8 ] \\grg d8 [ e8 \\gra e8 ] |\n",
+        &vec_out[..]
+    );
+}
+
+#[test]
+fn test_bmw_out() {
+    let bar = process_bar(r"\grg c8 [e8 \gra e8] \grg d8 [e8 \gra e8]");
+    let writer = BufWriter::new(Vec::new());
+    let mut bmw_writer = BMWWriter { writer };
+    bmw_writer
+        .write_measure(&bar, 1)
+        .expect("Couldn't write in test");
+    let vec_out = bmw_writer.writer.into_inner().unwrap();
+    assert_eq!(
+        b"gg Cr_8 El_8 strla El_8 \tgg Dr_8 El_8 strla El_8 \t",
+        &vec_out[..]
+    );
 }

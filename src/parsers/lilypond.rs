@@ -153,7 +153,15 @@ fn process_lily_note(note: &str, embellishment: Option<Embellishment>) -> Note {
         b"8" => Duration::Eighth,
         b"4" => Duration::Quarter,
         b"4." => Duration::DottedQuarter,
-        _ => panic!("Invalid Duration in {note}"),
+        b"8." => Duration::DottedEighth,
+        b"16" => Duration::Sixteenth,
+        b"16." => Duration::DottedSixteenth,
+        b"32" => Duration::ThirtySecond,
+        b"2" => Duration::Half,
+        b"2." => Duration::DottedHalf,
+        b"1" => Duration::Whole,
+        b"1." => Duration::DottedWhole,
+        _ => panic!("Unrecognized duration in note: {note}"),
     };
     Note {
         pitch,
